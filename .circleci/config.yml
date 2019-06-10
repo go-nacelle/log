@@ -3,7 +3,7 @@ jobs:
   build:
     docker:
       - image: circleci/golang:1.12
-    working_directory: /project/log
+    working_directory: /log
     steps:
       - checkout
       - run: go get github.com/mattn/goveralls
