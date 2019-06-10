@@ -20,17 +20,17 @@ func (s *RollupSuite) TestRollupSimilarMessages(t sweet.T) {
 	for i := 1; i <= 20; i++ {
 		// Logged, starting window
 		adapter.LogWithFields(LevelDebug, nil, "a")
-		Expect(shim.messages).To(HaveLen(2*i - 1))
+		Expect(shim.copy()).To(HaveLen(2*i - 1))
 
 		// Stashed
 		adapter.LogWithFields(LevelDebug, nil, "a")
 		adapter.LogWithFields(LevelDebug, nil, "a")
-		Expect(shim.messages).To(HaveLen(2*i - 1))
+		Expect(shim.copy()).To(HaveLen(2*i - 1))
 
 		// Flushed
 		clock.BlockingAdvance(time.Second)
-		Eventually(func() []*logMessage { return shim.messages }).Should(HaveLen(2 * i))
-		Expect(shim.messages[2*i-1].fields[FieldRollup]).To(Equal(2))
+		Eventually(shim.copy).Should(HaveLen(2 * i))
+		Expect(shim.copy()[2*i-1].fields[FieldRollup]).To(Equal(2))
 	}
 }
 
@@ -47,7 +47,7 @@ func (s *RollupSuite) TestRollupInactivity(t sweet.T) {
 	}
 
 	// All messages present
-	Eventually(func() []*logMessage { return shim.messages }).Should(HaveLen(20))
+	Eventually(shim.copy).Should(HaveLen(20))
 }
 
 func (s *RollupSuite) TestRollupFlushesRelativeToFirstMessage(t sweet.T) {
@@ -66,7 +66,7 @@ func (s *RollupSuite) TestRollupFlushesRelativeToFirstMessage(t sweet.T) {
 	}
 
 	clock.BlockingAdvance(time.Millisecond * 50)
-	Eventually(func() []*logMessage { return shim.messages }).Should(HaveLen(2))
+	Eventually(shim.copy).Should(HaveLen(2))
 }
 
 func (s *RollupSuite) TestAllDistinctMessages(t sweet.T) {
@@ -82,5 +82,5 @@ func (s *RollupSuite) TestAllDistinctMessages(t sweet.T) {
 		adapter.LogWithFields(LevelDebug, nil, "c")
 	}
 
-	Expect(shim.messages).To(HaveLen(3))
+	Expect(shim.copy()).To(HaveLen(3))
 }

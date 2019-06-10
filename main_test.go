@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"io"
 	"os"
+	"sync"
 	"testing"
 
 	"github.com/aphistic/sweet"
@@ -32,13 +33,26 @@ func TestMain(m *testing.M) {
 
 type testShim struct {
 	messages []*logMessage
+	mutex    sync.RWMutex
 }
 
 func (ts *testShim) WithFields(fields Fields) logShim {
 	return ts
 }
 
+func (ts *testShim) copy() []*logMessage {
+	ts.mutex.RLock()
+	defer ts.mutex.RUnlock()
+
+	messages := make([]*logMessage, len(ts.messages))
+	copy(messages, ts.messages)
+	return messages
+}
+
 func (ts *testShim) LogWithFields(level LogLevel, fields Fields, format string, args ...interface{}) {
+	ts.mutex.Lock()
+	defer ts.mutex.Unlock()
+
 	ts.messages = append(ts.messages, &logMessage{
 		level:  level,
 		fields: addCaller(fields),
