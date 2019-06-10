@@ -1,7 +1,7 @@
 # Nacelle Logging
 
-[![CircleCI](https://circleci.com/gh/go-nacelle/logs.svg?style=svg)](https://circleci.com/gh/go-nacelle/logs)
-[![Coverage Status](https://coveralls.io/repos/github/go-nacelle/logs/badge.svg?branch=master)](https://coveralls.io/github/go-nacelle/logs?branch=master)
+[![CircleCI](https://circleci.com/gh/go-nacelle/log.svg?style=svg)](https://circleci.com/gh/go-nacelle/log)
+[![Coverage Status](https://coveralls.io/repos/github/go-nacelle/log/badge.svg?branch=master)](https://coveralls.io/github/go-nacelle/log?branch=master)
 
 Nacelle provides rather opinionated structured logging following a few short principles.
 
