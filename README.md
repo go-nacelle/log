@@ -4,66 +4,71 @@ Opinionated structured logger for [nacelle](https://github.com/go-nacelle/nacell
 
 ---
 
-Logging in nacelle follows two sshort principles:
+Logging in nacelle are **structured** -- it is absolutely essential to be able to correlate and aggregate log messages to form a view of a running system. Logging in nacelle also only outputs to **standard error**. In order to redirect logs to a secondary target (such as an ELK stack), the application's output should simply be redirected. This keeps the application simple and allows redirection of logs to **any** source without requiring an application update. For an example of redirection when run in a Docker container, see nacelle's [fluentd wrapper](https://github.com/go-nacelle/fluentd).
 
-(1) Logs must be structured. It is absolutely essential to be able to correlate and
-    aggregate log messages to form a view of a running system.
-(2) Applications should always log to a standard error. In order to redirect logs to a
-    secondary target (such as an ELK stack), the application's output should simply be
-    redirected. This keeps the application simple and allows redirection of logs to
-    **any** source without requiring an application update. For an example of redirection
-    when run in a Docker container, see nacelle's
-    [fluentd wrapper](https://github.com/go-nacelle/fluentd).
+The interfaces provided by library are backed by [gomol](https://github.com/aphistic/gomol).
 
-The interfaces provided here are backed by [gomol](https://github.com/aphistic/gomol).
+### Usage
 
-## Interface
-
-The logging interface is simple. Each log method (each one named after the level at which
-it will log) provides a printf-like interface. Logging at the fatal level will abort the
-application after the log has been flushed.
+There are five standard log levels: `Debug`, `Info`, `Warning`, `Error`, and `Fatal`. Logging at the fatal level will abort the application after flushing any outstanding log messages. The logger interface has a method for each log level with printf-like arguments (a format string and a variable number of arguments used to construct the message).
 
 ```go
-logger.Debug("A debug message (%#v)", args...)
-logger.Info("A info message (%#v)", args...)
-logger.Warning("A warning message (%#v)", args...)
-logger.Error("A error message (%#v)", args...)
-logger.Fatal("A fatal message (%#v)", args...)
+logger.Error("Failed to dial database (%s)", err.Error())
 ```
 
-Each log method also has a WithFields variant, which takes a `Fields` object as its first
-parameter. Fields are a map from strings to interfaces. Each field provided to the logger
-will be output with (but separately from) the formatted message.
+In addition, the logger interface has a `WithFields` variant, which takes a map of additional log data as a first argument. A `nacelle.Fields` value is a map from strings to interface types and can be used interchangeably.
 
 ```go
-fields:=nacelle.Fields{
-    "foo": "bar",
-    "baz": 12345,
+logger.DebugWithFields(nacelle.Fields{
+    "requestId": "00001111-2222-3333-4444-555566667777",
+}, "Accepted request from %s", remoteAddr)
+```
+
+A logger can also be decorated with a set of fields so that multiple calls to the logger share the same set of base fields. This is useful for message correlation in servers where a logger instance can be given a unique request or client identifier. Creating a decorated logger does not modify the base logger, thus it is safe to create multiple concurrent decorated loggers from the same logger instance without worrying about interference.
+
+```go
+requestLogger := logger.WithFields(nacelle.Fields{
+    "requestId": "00001111-2222-3333-4444-555566667777",
+})
+
+requestLogger.Info("Accepted request from %s", remoteAddr)
+```
+
+### Adapters
+
+This library ships with a handful of useful logging adapters. These are extensions of the logger interface that add additional behavior or additional structured data. A custom adapter can be created for behavior that is not provided here.
+
+The **replay** adapter supports journaling log messages and conditionally re-writing them at a different log level. This is useful in circumstances where all the debug logs for a particular request need to be available without making all debug logs in the process available. Messages which are replayed at a higher level will keep the original message timestamp (if supplied), or use the time the log was first published (if not supplied). Each message will also be sent with an additional field called `replayed-from-level` with a value equal to the original level of the message.
+
+```go
+requestLogger := NewReplayAdapter(
+    logger,         // base logger
+    log.LevelDebug, // track debug messages for replay
+    log.LevelInfo,  // also track info messages
+)
+
+// handle request
+
+if requestTookTooLong() {
+    // Re-log journaled messages at warning level
+    requestLogger.Replay(log.LevelWarning)
 }
-
-logger.DebugWithFields(fields, "A debug message (%#v)", args...)
-logger.InfoWithFields(fields, "A info message (%#v)", args...)
-logger.WarningWithFields(fields, "A warning message (%#v)", args...)
-logger.ErrorWithFields(fields, "A error message (%#v)", args...)
-logger.FatalWithFields(fields, "A fatal message (%#v)", args...)
 ```
 
-A logger can also be decorated with fields and used later so that multiple log messages
-share the same set of fields. This is useful for request correlation in servers where a
-logger instance can be given a unique request identifier.
+The **rollup** adapter supports collapsing similar log messages into a multiplicity. This is intended to be used with a chatty subsystem that only logs a handful of messages for which a higher frequency does not provide a benefit (for example, failure to connect to a Redis cache during a network partition). A rollup begins once two messages with the same format string are seen within the rollup window period. During a rollup, all log messages (except for the first in the window) are discarded but counted, and the **first** log message in that window will be sent at the end of the window period with an additional field called `rollup-multiplicity` with a value equal to the number of logs in that window.s
 
 ```go
-requestLogger := logger.WithFields(fields)
+logger := NewRollupAdapter(
+    logger,      // base logger
+    time.Second, // rollup window
+)
 
-// Same as above
-requestLogger.Info("A debug message (%#v)", args...)
+for i:=0; i < 10000; i++ {
+    logger.Debug("Some problem here!")
+}
 ```
 
-A logger should **not** be constructed, but should be injected via a service container.
-See the [service package documentation](https://github.com/go-nacelle/tree/master/service)
-for additional formation.
-
-## Configuration
+### Configuration
 
 The default logging behavior can be configured by the following environment variables.
 
@@ -77,63 +82,3 @@ The default logging behavior can be configured by the following environment vari
 | LOG_SHORT_TIME               | false   | Omit date from timestamp when true. Works with `console` encoding only. |
 | LOG_DISPLAY_FIELDS           | true    | Omit log fields from output when false. Works with `console` encoding only. |
 | LOG_DISPLAY_MULTILINE_FIELDS | false   | Print fields on one line when true, one field per line when false. Works with `console` encoding only. |
-
-## Adapters
-
-Nacelle ships with a handful of logging adapters - objects which wrap a logger
-instance and decorates it with some additional behavior or data. A custom adapter
-can be created for behavior which is not provided here.
-
-### Replay
-
-The *ReplayAdapter* supports replaying a sequence of log messages but at a higher
-log level.
-
-*Example use case:* Each request in an HTTP server has a unique log adapter which
-traces the request. This adapter generally logs at the DEBUG level. When a request
-encounters an error or is being served slowly, the entire trace can be replayed at
-a higher level so the entire context is available for analysis.
-
-```go
-adapter := NewReplayAdapter(
-    logger,          // base logger
-    log.LevelDebug,  // track debug messages for replay
-    log.LevelInfo,   // also track info messages
-)
-
-// ...
-
-if requestIsTakingLong() {
-    // Re-log journaled messages at warning level
-    adapter.Replay(log.LevelWarning)
-}
-```
-
-Messages which are replayed at a higher level will keep the original message timestamp
-(if supplied), or use the time the `Log` message was invoked (if not supplied). Each
-message will also be sent with an additional field called `replayed-from-level` with a
-value equal to the original level of the message.
-
-### Rollup
-
-The *RollupAdapter* supports collapsing similar log messages into a multiplicity. This
-is intended to be used with a chatty subsystem that only logs a handful of messages for
-which a higher frequency does not provide a benefit (for example, failure to connect to
-a Redis cache during a network partition).
-
-```go
-adapter := NewRollupAdapter(
-    logger,       // base logger
-    time.Second,  // rollup window
-)
-
-for i:=0; i < 10000; i++ {
-    adapter.Debug("Some problem here!")
-}
-```
-
-A **rollup** begins once two messages with the same format string are seen within the
-rollup window period. During a rollup, all log messages (except for the first in the
-window) are discarded but counted, and the **first** log message in that window will
-be sent at the end of the window period with an additional field called `rollup-multiplicity`
-with a value equal to the number of logs in that window.
