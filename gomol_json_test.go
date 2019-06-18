@@ -39,7 +39,7 @@ func (s *GomolJSONSuite) TestLogm(t sweet.T) {
 	logger.Logm(
 		timestamp,
 		gomol.LevelFatal,
-		Fields{"attr1": 4321},
+		LogFields{"attr1": 4321},
 		"test 1234",
 	)
 
@@ -68,7 +68,7 @@ func (s *GomolJSONSuite) TestBaseAttrs(t sweet.T) {
 	logger.Logm(
 		timestamp,
 		gomol.LevelDebug,
-		Fields{
+		LogFields{
 			"attr1": 4321,
 			"attr3": "val3",
 		},
@@ -100,7 +100,7 @@ func (s *GomolJSONSuite) TestCustomFieldNames(t sweet.T) {
 	logger.Logm(
 		timestamp,
 		gomol.LevelFatal,
-		Fields{"attr1": 4321},
+		LogFields{"attr1": 4321},
 		"test 1234",
 	)
 

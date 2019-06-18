@@ -25,11 +25,11 @@ var gomolLevels = map[LogLevel]gomol.LogLevel{
 //
 // Shim
 
-func NewGomolLogger(logger *gomol.LogAdapter, initialFields Fields) Logger {
+func NewGomolLogger(logger *gomol.LogAdapter, initialFields LogFields) Logger {
 	return adaptShim((&GomolShim{logger}).WithFields(initialFields))
 }
 
-func (g *GomolShim) WithFields(fields Fields) logShim {
+func (g *GomolShim) WithFields(fields LogFields) logShim {
 	if len(fields) == 0 {
 		return g
 	}
@@ -37,7 +37,7 @@ func (g *GomolShim) WithFields(fields Fields) logShim {
 	return &GomolShim{gomol.NewLogAdapterFor(g.logger, gomol.NewAttrsFromMap(fields))}
 }
 
-func (g *GomolShim) LogWithFields(level LogLevel, fields Fields, format string, args ...interface{}) {
+func (g *GomolShim) LogWithFields(level LogLevel, fields LogFields, format string, args ...interface{}) {
 	g.logger.Log(gomolLevels[level], gomol.NewAttrsFromMap(addCaller(fields).normalizeTimeValues()), format, args...)
 
 	if level == LevelFatal {
@@ -117,7 +117,13 @@ func setupJSONLogger(c *Config) error {
 	return nil
 }
 
-func newGomolConsoleTemplate(color, shortTime, displayFields, displayMultilineFields bool, blacklist []string) (*gomol.Template, error) {
+func newGomolConsoleTemplate(
+	color bool,
+	shortTime bool,
+	displayFields bool,
+	displayMultilineFields bool,
+	blacklist []string,
+) (*gomol.Template, error) {
 	var (
 		attrPrefix  = " "
 		attrPadding = ""

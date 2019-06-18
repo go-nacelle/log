@@ -16,10 +16,10 @@ There are five standard log levels: `Debug`, `Info`, `Warning`, `Error`, and `Fa
 logger.Error("Failed to dial database (%s)", err.Error())
 ```
 
-In addition, the logger interface has a `WithFields` variant, which takes a map of additional log data as a first argument. A `nacelle.Fields` value is a map from strings to interface types and can be used interchangeably.
+In addition, the logger interface has a `WithFields` variant, which takes a map of additional log data as a first argument. A `nacelle.LogFields` value is a map from strings to interface types and can be used interchangeably.
 
 ```go
-logger.DebugWithFields(nacelle.Fields{
+logger.DebugWithFields(nacelle.LogFields{
     "requestId": "00001111-2222-3333-4444-555566667777",
 }, "Accepted request from %s", remoteAddr)
 ```
@@ -27,7 +27,7 @@ logger.DebugWithFields(nacelle.Fields{
 A logger can also be decorated with a set of fields so that multiple calls to the logger share the same set of base fields. This is useful for message correlation in servers where a logger instance can be given a unique request or client identifier. Creating a decorated logger does not modify the base logger, thus it is safe to create multiple concurrent decorated loggers from the same logger instance without worrying about interference.
 
 ```go
-requestLogger := logger.WithFields(nacelle.Fields{
+requestLogger := logger.WithFields(nacelle.LogFields{
     "requestId": "00001111-2222-3333-4444-555566667777",
 })
 

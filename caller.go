@@ -6,9 +6,9 @@ import (
 	"strings"
 )
 
-func addCaller(fields Fields) Fields {
+func addCaller(fields LogFields) LogFields {
 	if fields == nil {
-		fields = Fields{}
+		fields = LogFields{}
 	}
 
 	if _, ok := fields["caller"]; !ok {
@@ -30,7 +30,6 @@ func getCaller() string {
 }
 
 func trimPath(path string) string {
-	//
 	// For details, see http://goo.gl/FL2U8s.
 
 	if idx := strings.LastIndexByte(path, '/'); idx >= 0 {

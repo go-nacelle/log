@@ -13,7 +13,7 @@ func (s *LoggerSuite) TestNormalizeTimeValues(t sweet.T) {
 	var (
 		t1     = time.Unix(1503939881, 0)
 		t2     = time.Unix(1503939891, 0)
-		fields = Fields{
+		fields = LogFields{
 			"foo":  "bar",
 			"bar":  t1,
 			"baz":  t2,
@@ -34,5 +34,5 @@ func (s *LoggerSuite) TestNormalizeTimeValues(t sweet.T) {
 }
 
 func (s *LoggerSuite) TestNormalizeTimeValuesOnNilFields(t sweet.T) {
-	Expect(Fields(nil).normalizeTimeValues()).To(BeNil())
+	Expect(LogFields(nil).normalizeTimeValues()).To(BeNil())
 }

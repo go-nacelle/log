@@ -52,7 +52,7 @@ func newRollupShim(logger Logger, clock glock.Clock, windowDuration time.Duratio
 	}
 }
 
-func (s *rollupShim) WithFields(fields Fields) logShim {
+func (s *rollupShim) WithFields(fields LogFields) logShim {
 	if len(fields) == 0 {
 		return s
 	}
@@ -64,7 +64,7 @@ func (s *rollupShim) WithFields(fields Fields) logShim {
 	)
 }
 
-func (s *rollupShim) LogWithFields(level LogLevel, fields Fields, format string, args ...interface{}) {
+func (s *rollupShim) LogWithFields(level LogLevel, fields LogFields, format string, args ...interface{}) {
 	fields = addCaller(fields)
 
 	if s.getWindow(format).record(s.logger, s.clock, s.windowDuration, level, fields, format, args...) {
@@ -109,7 +109,7 @@ func (w *logWindow) record(
 	clock glock.Clock,
 	windowDuration time.Duration,
 	level LogLevel,
-	fields Fields,
+	fields LogFields,
 	format string,
 	args ...interface{},
 ) bool {

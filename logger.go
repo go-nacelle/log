@@ -2,8 +2,8 @@ package log
 
 type (
 	Logger interface {
-		WithFields(Fields) Logger
-		LogWithFields(LogLevel, Fields, string, ...interface{})
+		WithFields(LogFields) Logger
+		LogWithFields(LogLevel, LogFields, string, ...interface{})
 		Sync() error
 
 		// Convenience Methods
@@ -12,11 +12,11 @@ type (
 		Warning(string, ...interface{})
 		Error(string, ...interface{})
 		Fatal(string, ...interface{})
-		DebugWithFields(Fields, string, ...interface{})
-		InfoWithFields(Fields, string, ...interface{})
-		WarningWithFields(Fields, string, ...interface{})
-		ErrorWithFields(Fields, string, ...interface{})
-		FatalWithFields(Fields, string, ...interface{})
+		DebugWithFields(LogFields, string, ...interface{})
+		InfoWithFields(LogFields, string, ...interface{})
+		WarningWithFields(LogFields, string, ...interface{})
+		ErrorWithFields(LogFields, string, ...interface{})
+		FatalWithFields(LogFields, string, ...interface{})
 	}
 
 	LogLevel int

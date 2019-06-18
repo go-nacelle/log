@@ -10,7 +10,7 @@ type Config struct {
 	LogEncoding               string            `env:"log_encoding" file:"log_encoding" default:"console"`
 	LogColorize               bool              `env:"log_colorize" file:"log_colorize" default:"true"`
 	LogJSONFieldNames         map[string]string `env:"log_json_field_names" file:"log_json_field_names"`
-	LogInitialFields          Fields            `env:"log_fields" file:"log_fields"`
+	LogInitialFields          LogFields         `env:"log_fields" file:"log_fields"`
 	LogShortTime              bool              `env:"log_short_time" file:"log_short_time" default:"false"`
 	LogDisplayFields          bool              `env:"log_display_fields" file:"log_display_fields" default:"true"`
 	LogDisplayMultilineFields bool              `env:"log_display_multiline_fields" file:"log_display_multiline_fields" default:"false"`

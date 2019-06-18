@@ -36,7 +36,7 @@ type testShim struct {
 	mutex    sync.RWMutex
 }
 
-func (ts *testShim) WithFields(fields Fields) logShim {
+func (ts *testShim) WithFields(fields LogFields) logShim {
 	return ts
 }
 
@@ -49,7 +49,7 @@ func (ts *testShim) copy() []*logMessage {
 	return messages
 }
 
-func (ts *testShim) LogWithFields(level LogLevel, fields Fields, format string, args ...interface{}) {
+func (ts *testShim) LogWithFields(level LogLevel, fields LogFields, format string, args ...interface{}) {
 	ts.mutex.Lock()
 	defer ts.mutex.Unlock()
 

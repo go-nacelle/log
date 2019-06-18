@@ -2,8 +2,8 @@ package log
 
 type (
 	logShim interface {
-		WithFields(Fields) logShim
-		LogWithFields(LogLevel, Fields, string, ...interface{})
+		WithFields(LogFields) logShim
+		LogWithFields(LogLevel, LogFields, string, ...interface{})
 		Sync() error
 	}
 
@@ -18,7 +18,7 @@ type (
 
 	logMessage struct {
 		level  LogLevel
-		fields Fields
+		fields LogFields
 		format string
 		args   []interface{}
 	}
@@ -32,7 +32,7 @@ func adaptReplayShim(shim *replayShim) ReplayLogger {
 	return &replayShimAdapter{adaptShim(shim), shim}
 }
 
-func (sa *shimAdapter) WithFields(fields Fields) Logger {
+func (sa *shimAdapter) WithFields(fields LogFields) Logger {
 	if len(fields) == 0 {
 		return sa
 	}
@@ -40,7 +40,7 @@ func (sa *shimAdapter) WithFields(fields Fields) Logger {
 	return &shimAdapter{shim: sa.shim.WithFields(fields)}
 }
 
-func (sa *shimAdapter) LogWithFields(level LogLevel, fields Fields, format string, args ...interface{}) {
+func (sa *shimAdapter) LogWithFields(level LogLevel, fields LogFields, format string, args ...interface{}) {
 	sa.shim.LogWithFields(level, addCaller(fields), format, args...)
 }
 
@@ -68,23 +68,23 @@ func (sa *shimAdapter) Fatal(format string, args ...interface{}) {
 	sa.shim.LogWithFields(LevelFatal, addCaller(nil), format, args...)
 }
 
-func (sa *shimAdapter) DebugWithFields(fields Fields, format string, args ...interface{}) {
+func (sa *shimAdapter) DebugWithFields(fields LogFields, format string, args ...interface{}) {
 	sa.shim.LogWithFields(LevelDebug, addCaller(fields), format, args...)
 }
 
-func (sa *shimAdapter) InfoWithFields(fields Fields, format string, args ...interface{}) {
+func (sa *shimAdapter) InfoWithFields(fields LogFields, format string, args ...interface{}) {
 	sa.shim.LogWithFields(LevelInfo, addCaller(fields), format, args...)
 }
 
-func (sa *shimAdapter) WarningWithFields(fields Fields, format string, args ...interface{}) {
+func (sa *shimAdapter) WarningWithFields(fields LogFields, format string, args ...interface{}) {
 	sa.shim.LogWithFields(LevelWarning, addCaller(fields), format, args...)
 }
 
-func (sa *shimAdapter) ErrorWithFields(fields Fields, format string, args ...interface{}) {
+func (sa *shimAdapter) ErrorWithFields(fields LogFields, format string, args ...interface{}) {
 	sa.shim.LogWithFields(LevelError, addCaller(fields), format, args...)
 }
 
-func (sa *shimAdapter) FatalWithFields(fields Fields, format string, args ...interface{}) {
+func (sa *shimAdapter) FatalWithFields(fields LogFields, format string, args ...interface{}) {
 	sa.shim.LogWithFields(LevelFatal, addCaller(fields), format, args...)
 }
 

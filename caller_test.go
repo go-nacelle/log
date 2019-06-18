@@ -14,9 +14,9 @@ import (
 type CallerSuite struct{}
 
 var (
-	testFields1 = Fields{"A": 1}
-	testFields2 = Fields{"B": 2}
-	testFields3 = Fields{"C": 3}
+	testFields1 = LogFields{"A": 1}
+	testFields2 = LogFields{"B": 2}
+	testFields3 = LogFields{"C": 3}
 )
 
 func (s *CallerSuite) testBasic(init func(*Config) (Logger, error)) {
@@ -25,7 +25,7 @@ func (s *CallerSuite) testBasic(init func(*Config) (Logger, error)) {
 		Expect(err).To(BeNil())
 
 		logger.Info("X")
-		logger.InfoWithFields(Fields{"empty": false}, "Y")
+		logger.InfoWithFields(LogFields{"empty": false}, "Y")
 		logger.Info("Z")
 		logger.Sync()
 	})
@@ -34,9 +34,9 @@ func (s *CallerSuite) testBasic(init func(*Config) (Logger, error)) {
 	Expect(lines).To(HaveLen(3))
 
 	var (
-		data1 = Fields{}
-		data2 = Fields{}
-		data3 = Fields{}
+		data1 = LogFields{}
+		data2 = LogFields{}
+		data3 = LogFields{}
 	)
 
 	Expect(json.Unmarshal([]byte(lines[0]), &data1)).To(BeNil())
@@ -61,7 +61,7 @@ func (s *CallerSuite) testReplay(init func(*Config) (Logger, error)) {
 		// Non-replayed messages are below log level - not emitted
 		adapter := NewReplayAdapter(logger, LevelDebug, LevelInfo)
 		adapter.Debug("X")
-		adapter.InfoWithFields(Fields{"empty": false}, "Y")
+		adapter.InfoWithFields(LogFields{"empty": false}, "Y")
 		adapter.Debug("Z")
 		adapter.Replay(LevelWarning)
 		adapter.Sync()
@@ -71,9 +71,9 @@ func (s *CallerSuite) testReplay(init func(*Config) (Logger, error)) {
 	Expect(lines).To(HaveLen(4))
 
 	var (
-		data1 = Fields{}
-		data2 = Fields{}
-		data3 = Fields{}
+		data1 = LogFields{}
+		data2 = LogFields{}
+		data3 = LogFields{}
 	)
 
 	Expect(json.Unmarshal([]byte(lines[1]), &data1)).To(BeNil())
@@ -110,8 +110,8 @@ func (s *CallerSuite) testRollup(init func(*Config) (Logger, error)) {
 	Expect(lines).To(HaveLen(2))
 
 	var (
-		data1 = Fields{}
-		data2 = Fields{}
+		data1 = LogFields{}
+		data2 = LogFields{}
 	)
 
 	Expect(json.Unmarshal([]byte(lines[0]), &data1)).To(BeNil())

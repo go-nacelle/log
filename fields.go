@@ -2,10 +2,10 @@ package log
 
 import "time"
 
-type Fields map[string]interface{}
+type LogFields map[string]interface{}
 
-func (f Fields) clone() Fields {
-	clone := Fields{}
+func (f LogFields) clone() LogFields {
+	clone := LogFields{}
 	for k, v := range f {
 		clone[k] = v
 	}
@@ -13,7 +13,7 @@ func (f Fields) clone() Fields {
 	return clone
 }
 
-func (f Fields) normalizeTimeValues() Fields {
+func (f LogFields) normalizeTimeValues() LogFields {
 	for key, val := range f {
 		switch v := val.(type) {
 		case time.Time:

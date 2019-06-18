@@ -65,7 +65,7 @@ func newReplayShim(logger Logger, clock glock.Clock, levels ...LogLevel) *replay
 	}
 }
 
-func (s *replayShim) WithFields(fields Fields) logShim {
+func (s *replayShim) WithFields(fields LogFields) logShim {
 	if len(fields) == 0 {
 		return s
 	}
@@ -76,7 +76,7 @@ func (s *replayShim) WithFields(fields Fields) logShim {
 	}
 }
 
-func (s *replayShim) LogWithFields(level LogLevel, fields Fields, format string, args ...interface{}) {
+func (s *replayShim) LogWithFields(level LogLevel, fields LogFields, format string, args ...interface{}) {
 	fields = addCaller(fields)
 
 	// Log immediately
@@ -97,7 +97,7 @@ func (s *replayShim) Replay(level LogLevel) {
 //
 // Shared Journal
 
-func (j *sharedJournal) record(logger Logger, level LogLevel, fields Fields, format string, args []interface{}) {
+func (j *sharedJournal) record(logger Logger, level LogLevel, fields LogFields, format string, args []interface{}) {
 	if !j.shouldJournal(level) {
 		return
 	}

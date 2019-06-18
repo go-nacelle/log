@@ -15,9 +15,9 @@ func (s *ReplaySuite) TestReplay(t sweet.T) {
 		adapter = newReplayShim(adaptShim(shim), clock, LevelDebug)
 	)
 
-	adapter.LogWithFields(LevelDebug, Fields{"x": "x"}, "foo", 12)
-	adapter.LogWithFields(LevelDebug, Fields{"y": "y"}, "bar", 43)
-	adapter.LogWithFields(LevelDebug, Fields{"z": "z"}, "baz", 74)
+	adapter.LogWithFields(LevelDebug, LogFields{"x": "x"}, "foo", 12)
+	adapter.LogWithFields(LevelDebug, LogFields{"y": "y"}, "bar", 43)
+	adapter.LogWithFields(LevelDebug, LogFields{"z": "z"}, "baz", 74)
 	adapter.Replay(LevelWarning)
 
 	messages := shim.copy()
