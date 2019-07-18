@@ -36,7 +36,7 @@ requestLogger.Info("Accepted request from %s", remoteAddr)
 
 ### Adapters
 
-This library ships with a handful of useful logging adapters. These are extensions of the logger interface that add additional behavior or additional structured data. A custom adapter can be created for behavior that is not provided here.
+Nacelle ships with a handful of useful logging adapters. These are extensions of the logger interface that add additional behavior or additional structured data. A custom adapter can be created for behavior that is not provided here.
 
 The **replay** adapter supports journaling log messages and conditionally re-writing them at a different log level. This is useful in circumstances where all the debug logs for a particular request need to be available without making all debug logs in the process available. Messages which are replayed at a higher level will keep the original message timestamp (if supplied), or use the time the log was first published (if not supplied). Each message will also be sent with an additional field called `replayed-from-level` with a value equal to the original level of the message.
 
