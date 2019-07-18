@@ -1,10 +1,10 @@
 # Nacelle Logging [![GoDoc](https://godoc.org/github.com/go-nacelle/log?status.svg)](https://godoc.org/github.com/go-nacelle/log) [![CircleCI](https://circleci.com/gh/go-nacelle/log.svg?style=svg)](https://circleci.com/gh/go-nacelle/log) [![Coverage Status](https://coveralls.io/repos/github/go-nacelle/log/badge.svg?branch=master)](https://coveralls.io/github/go-nacelle/log?branch=master)
 
-Opinionated structured logger for [nacelle](https://github.com/go-nacelle/nacelle).
+Opinionated structured logger for [nacelle](https://nacelle.dev).
 
 ---
 
-Logging in nacelle are **structured** -- it is absolutely essential to be able to correlate and aggregate log messages to form a view of a running system. Logging in nacelle also only outputs to **standard error**. In order to redirect logs to a secondary target (such as an ELK stack), the application's output should simply be redirected. This keeps the application simple and allows redirection of logs to **any** source without requiring an application update. For an example of redirection when run in a Docker container, see nacelle's [fluentd wrapper](https://github.com/go-nacelle/fluentd).
+Logs in nacelle are **structured** -- it is absolutely essential to be able to correlate and aggregate log messages to form a view of a running system. Logging in nacelle also only outputs to **standard error**. In order to redirect logs to a secondary target (such as an ELK stack), the application's output should simply be redirected. This keeps the application simple and allows redirection of logs to **any** source without requiring an application update. For an example of redirection when run in a Docker container, see nacelle's [fluentd wrapper](https://github.com/go-nacelle/fluentd).
 
 The interfaces provided by library are backed by [gomol](https://github.com/aphistic/gomol).
 
