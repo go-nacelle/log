@@ -14,8 +14,7 @@ type Config struct {
 	LogShortTime              bool              `env:"log_short_time" file:"log_short_time" default:"false"`
 	LogDisplayFields          bool              `env:"log_display_fields" file:"log_display_fields" default:"true"`
 	LogDisplayMultilineFields bool              `env:"log_display_multiline_fields" file:"log_display_multiline_fields" default:"false"`
-	RawLogFieldBlacklist      string            `env:"log_field_blacklist" file:"log_field_blacklist" mask:"true"`
-	LogFieldBlacklist         []string
+	LogFieldBlacklist         []string          `env:"log_field_blacklist" file:"log_field_blacklist"`
 }
 
 var (
@@ -40,11 +39,8 @@ func (c *Config) PostLoad() error {
 		}
 	}
 
-	for _, s := range strings.Split(c.RawLogFieldBlacklist, ",") {
-		c.LogFieldBlacklist = append(
-			c.LogFieldBlacklist,
-			strings.ToLower(strings.TrimSpace(s)),
-		)
+	for i, name := range c.LogFieldBlacklist {
+		c.LogFieldBlacklist[i] = strings.ToLower(name)
 	}
 
 	return nil
