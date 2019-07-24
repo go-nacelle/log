@@ -18,8 +18,6 @@ type (
 		ErrorWithFields(LogFields, string, ...interface{})
 		FatalWithFields(LogFields, string, ...interface{})
 	}
-
-	LogLevel int
 )
 
 const (
@@ -28,24 +26,9 @@ const (
 	LevelWarning
 	LevelInfo
 	LevelDebug
+)
 
+const (
 	ConsoleTimeFormat = "2006-01-02 15:04:05.000"
 	JSONTimeFormat    = "2006-01-02T15:04:05.000-0700"
 )
-
-func (l LogLevel) String() string {
-	switch l {
-	case LevelDebug:
-		return "debug"
-	case LevelInfo:
-		return "info"
-	case LevelWarning:
-		return "warning"
-	case LevelError:
-		return "error"
-	case LevelFatal:
-		return "fatal"
-	default:
-		return "unknown"
-	}
-}
