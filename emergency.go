@@ -17,7 +17,7 @@ func LogEmergencyErrors(message string, errs []error) {
 }
 
 func EmergencyLogger() Logger {
-	logger, _ := InitGomolShim(&Config{
+	logger, _ := InitLogger(&Config{
 		LogLevel:    "DEBUG",
 		LogEncoding: "json",
 	})

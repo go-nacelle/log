@@ -171,9 +171,9 @@ func (s *CallerSuite) TestTrimPath(t sweet.T) {
 	Expect(trimPath("/foo/bar/baz/bonk")).To(Equal("baz/bonk"))
 }
 
-func (s *CallerSuite) TestGomol(t sweet.T)                  { s.testBasic(InitGomolShim) }
-func (s *CallerSuite) TestGomolWithFields(t sweet.T)        { s.testFields(InitGomolShim) }
-func (s *CallerSuite) TestGomolWithReplayAdapter(t sweet.T) { s.testReplayAdapter(InitGomolShim) }
-func (s *CallerSuite) TestGomolWithRollupAdapter(t sweet.T) { s.testRollupAdapter(InitGomolShim) }
-func (s *CallerSuite) TestGomolReplay(t sweet.T)            { s.testReplay(InitGomolShim) }
-func (s *CallerSuite) TestGomolRollup(t sweet.T)            { s.testRollup(InitGomolShim) }
+func (s *CallerSuite) TestLogger(t sweet.T)                  { s.testBasic(InitLogger) }
+func (s *CallerSuite) TestLoggerWithFields(t sweet.T)        { s.testFields(InitLogger) }
+func (s *CallerSuite) TestLoggerWithReplayAdapter(t sweet.T) { s.testReplayAdapter(InitLogger) }
+func (s *CallerSuite) TestLoggerWithRollupAdapter(t sweet.T) { s.testRollupAdapter(InitLogger) }
+func (s *CallerSuite) TestLoggerReplay(t sweet.T)            { s.testReplay(InitLogger) }
+func (s *CallerSuite) TestLoggerRollup(t sweet.T)            { s.testRollup(InitLogger) }

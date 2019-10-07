@@ -7,9 +7,9 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-type LoggerSuite struct{}
+type FieldsSuite struct{}
 
-func (s *LoggerSuite) TestNormalizeTimeValues(t sweet.T) {
+func (s *FieldsSuite) TestNormalizeTimeValues(t sweet.T) {
 	var (
 		t1     = time.Unix(1503939881, 0)
 		t2     = time.Unix(1503939891, 0)
@@ -33,6 +33,6 @@ func (s *LoggerSuite) TestNormalizeTimeValues(t sweet.T) {
 	Expect(time.Parse(JSONTimeFormat, fields["baz"].(string))).To(Equal(t2))
 }
 
-func (s *LoggerSuite) TestNormalizeTimeValuesOnNilFields(t sweet.T) {
+func (s *FieldsSuite) TestNormalizeTimeValuesOnNilFields(t sweet.T) {
 	Expect(LogFields(nil).normalizeTimeValues()).To(BeNil())
 }

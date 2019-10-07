@@ -13,6 +13,15 @@ func (f LogFields) clone() LogFields {
 	return clone
 }
 
+func (f LogFields) concat(fields LogFields) LogFields {
+	clone := f.clone()
+	for k, v := range fields {
+		clone[k] = v
+	}
+
+	return clone
+}
+
 func (f LogFields) normalizeTimeValues() LogFields {
 	for key, val := range f {
 		switch v := val.(type) {

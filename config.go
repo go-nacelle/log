@@ -9,7 +9,7 @@ type Config struct {
 	LogLevel                  string            `env:"log_level" file:"log_level" default:"info"`
 	LogEncoding               string            `env:"log_encoding" file:"log_encoding" default:"console"`
 	LogColorize               bool              `env:"log_colorize" file:"log_colorize" default:"true"`
-	LogJSONFieldNames         map[string]string `env:"log_json_field_names" file:"log_json_field_names"`
+	LogJSONFieldNames         map[string]string `env:"log_json_field_names" file:"log_json_field_names"` // TODO - not in config
 	LogInitialFields          LogFields         `env:"log_fields" file:"log_fields"`
 	LogShortTime              bool              `env:"log_short_time" file:"log_short_time" default:"false"`
 	LogDisplayFields          bool              `env:"log_display_fields" file:"log_display_fields" default:"true"`
@@ -47,7 +47,7 @@ func (c *Config) PostLoad() error {
 }
 
 func isLegalLevel(level string) bool {
-	for _, whitelisted := range []string{"debug", "info", "warning", "error", "fatal"} {
+	for _, whitelisted := range names {
 		if level == whitelisted {
 			return true
 		}

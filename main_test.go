@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/aphistic/sweet"
-	"github.com/aphistic/sweet-junit"
+	junit "github.com/aphistic/sweet-junit"
 	. "github.com/onsi/gomega"
 )
 
@@ -19,10 +19,12 @@ func TestMain(m *testing.M) {
 	sweet.Run(m, func(s *sweet.S) {
 		s.RegisterPlugin(junit.NewPlugin())
 
-		s.AddSuite(&LoggerSuite{})
+		s.AddSuite(&BaseLoggerSuite{})
 		s.AddSuite(&CallerSuite{})
 		s.AddSuite(&ConfigSuite{})
-		s.AddSuite(&GomolJSONSuite{})
+		s.AddSuite(&ConsoleLoggerSuite{})
+		s.AddSuite(&FieldsSuite{})
+		s.AddSuite(&JSONLoggerSuite{})
 		s.AddSuite(&ReplaySuite{})
 		s.AddSuite(&RollupSuite{})
 	})

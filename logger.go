@@ -19,16 +19,3 @@ type (
 		FatalWithFields(LogFields, string, ...interface{})
 	}
 )
-
-const (
-	LevelFatal LogLevel = iota
-	LevelError
-	LevelWarning
-	LevelInfo
-	LevelDebug
-)
-
-const (
-	ConsoleTimeFormat = "2006-01-02 15:04:05.000"
-	JSONTimeFormat    = "2006-01-02T15:04:05.000-0700"
-)

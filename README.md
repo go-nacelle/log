@@ -82,16 +82,16 @@ The following environment variables change the behavior of the loggers when usin
 Example log output is shown below. The outputs are configure in order with: the default configuration, `LOG_ENCODING=json`, `LOG_DISPLAY_FIELDS=false`, `LOG_SHORT_TIME=true`, and `LOG_DISPLAY_MULTILINE_FIELDS=true`.
 
 ```
-[I] [2019/07/24 09:15:30.806] Accepted request from 68.6.165.7 caller=derision/main.go:20 requestId=12341234-1234-1234-1234-123412341234 sequence_number=2
+[I] [2019/07/24 09:15:30.806] Accepted request from 68.6.165.7 caller=derision/main.go:20 requestId=12341234-1234-1234-1234-123412341234 sequenceNumber=2
 
-{"caller":"derision/main.go:20","level":"info","message":"Accepted request from 68.6.165.7","requestId":"12341234-1234-1234-1234-123412341234","sequence_number":2,"timestamp":"2019-07-24T09:16:55.673-0700"}
+{"caller":"derision/main.go:20","level":"info","message":"Accepted request from 68.6.165.7","requestId":"12341234-1234-1234-1234-123412341234","sequenceNumber":2,"timestamp":"2019-07-24T09:16:55.673-0700"}
 
 [I] [2019/07/24 09:15:49.517] Accepted request from 68.6.165.7
 
-[I] [09:17:56] Accepted request from 68.6.165.7 caller=derision/main.go:20 requestId=12341234-1234-1234-1234-123412341234 sequence_number=2
+[I] [09:17:56] Accepted request from 68.6.165.7 caller=derision/main.go:20 requestId=12341234-1234-1234-1234-123412341234 sequenceNumber=2
 
 [I] [2019/07/24 09:16:38.117] Accepted request from 68.6.165.7
     caller = derision/main.go:20
     requestId = 12341234-1234-1234-1234-123412341234
-    sequence_number = 2
+    sequenceNumber = 2
 ```
