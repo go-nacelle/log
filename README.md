@@ -30,6 +30,20 @@ requestLogger := logger.WithFields(nacelle.LogFields{
 requestLogger.Info("Accepted request from %s", remoteAddr)
 ```
 
+### Caller Stack
+
+Sometimes it is useful to define helper functions that logs messages for you in a common way (applying common context, performing additional behavior on errors, etc). Unfortunately, this can interfere with the way the caller file and line number are discovered. The logger has a `WithIndirectCaller` method that will increase the depth used when scanning the stack for callers. This should be used at each log location that aggregates log calls (e.g. any place where knowing this source location would not be helpful).
+
+```go
+func logForMe(message string) {
+    parentLogger.WithIndirectCaller().Log(message)
+}
+
+logForMe("foobar")
+```
+
+Using a logger instance directly does not require this additional hint.
+
 ### Adapters
 
 Nacelle ships with a handful of useful logging adapters. These are extensions of the logger interface that add additional behavior or additional structured data. A custom adapter can be created for behavior that is not provided here.
@@ -59,7 +73,7 @@ logger := NewRollupAdapter(
     time.Second, // rollup window
 )
 
-for i:=0; i < 10000; i++ {
+for i := 0; i < 10000; i++ {
     logger.Debug("Some problem here!")
 }
 ```

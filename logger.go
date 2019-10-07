@@ -2,6 +2,7 @@ package log
 
 type (
 	Logger interface {
+		WithIndirectCaller() Logger
 		WithFields(LogFields) Logger
 		LogWithFields(LogLevel, LogFields, string, ...interface{})
 		Sync() error

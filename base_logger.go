@@ -67,7 +67,7 @@ func (s *baseShim) LogWithFields(level LogLevel, fields LogFields, format string
 	}
 
 	seq := atomic.AddUint64(&s.wrapper.sequence, 1)
-	fields = addCaller(fields).normalizeTimeValues()
+	fields = fields.normalizeTimeValues()
 	fields["sequenceNumber"] = seq
 
 	s.wrapper.logger.Log(

@@ -126,6 +126,46 @@ func (s *CallerSuite) testRollup(init func(*Config) (Logger, error)) {
 	Expect(data2["caller"]).To(Equal(fmt.Sprintf("log/caller_test.go:%d", start)))
 }
 
+func (s *CallerSuite) testAdapter(init func(*Config) (Logger, error)) {
+	stderr := captureStderr(func() {
+		logger, err := init(&Config{LogLevel: "info", LogEncoding: "json"})
+		Expect(err).To(BeNil())
+		// Push caller stack out once for each indirection
+		indirectLogger := logger.WithIndirectCaller().WithIndirectCaller().WithIndirectCaller()
+
+		log3 := func(message string) { indirectLogger.Info(message) }
+		log2 := func(message string) { log3(message) }
+		log1 := func(message string) { log2(message) }
+
+		log1("X")
+		log1("Y")
+		log1("Z")
+		logger.Sync()
+	})
+
+	lines := strings.Split(strings.TrimSpace(stderr), "\n")
+	Expect(lines).To(HaveLen(3))
+
+	var (
+		data1 = LogFields{}
+		data2 = LogFields{}
+		data3 = LogFields{}
+	)
+
+	Expect(json.Unmarshal([]byte(lines[0]), &data1)).To(BeNil())
+	Expect(json.Unmarshal([]byte(lines[1]), &data2)).To(BeNil())
+	Expect(json.Unmarshal([]byte(lines[2]), &data3)).To(BeNil())
+
+	// Note: this value refers to the line number containing `logger.Info("X")` in
+	// the function literal above. If code is added before that line, this value
+	// must be updated.
+	start := 140
+
+	Expect(data1["caller"]).To(Equal(fmt.Sprintf("log/caller_test.go:%d", start+0)))
+	Expect(data2["caller"]).To(Equal(fmt.Sprintf("log/caller_test.go:%d", start+1)))
+	Expect(data3["caller"]).To(Equal(fmt.Sprintf("log/caller_test.go:%d", start+2)))
+}
+
 func (s *CallerSuite) testFields(init func(*Config) (Logger, error)) {
 	s.testBasic(func(config *Config) (Logger, error) {
 		logger, err := init(config)
@@ -172,6 +212,7 @@ func (s *CallerSuite) TestTrimPath(t sweet.T) {
 }
 
 func (s *CallerSuite) TestLogger(t sweet.T)                  { s.testBasic(InitLogger) }
+func (s *CallerSuite) TestAdapter(t sweet.T)                 { s.testAdapter(InitLogger) }
 func (s *CallerSuite) TestLoggerWithFields(t sweet.T)        { s.testFields(InitLogger) }
 func (s *CallerSuite) TestLoggerWithReplayAdapter(t sweet.T) { s.testReplayAdapter(InitLogger) }
 func (s *CallerSuite) TestLoggerWithRollupAdapter(t sweet.T) { s.testRollupAdapter(InitLogger) }
