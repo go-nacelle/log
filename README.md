@@ -71,6 +71,7 @@ The following environment variables change the behavior of the loggers when usin
 | Environment Variable         | Default | Description |
 | ---------------------------- | ------- | ----------- |
 | LOG_COLORIZE                 | true    | Colorize log messages by level when true. Works with `console` encoding only. |
+| LOG_JSON_FIELD_NAMES         |         | A JSON-encoded map to rename the fields for `message`, `timestamp`, and/or `level`. |
 | LOG_DISPLAY_FIELDS           | true    | Omit log fields from output when false. Works with `console` encoding only. |
 | LOG_DISPLAY_MULTILINE_FIELDS | false   | Print fields on one line when true, one field per line when false. Works with `console` encoding only. |
 | LOG_ENCODING                 | console | `console` for human-readable output and `json` for JSON-formatted output. |
