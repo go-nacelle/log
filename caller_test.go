@@ -131,7 +131,7 @@ func (s *CallerSuite) testAdapter(init func(*Config) (Logger, error)) {
 		logger, err := init(&Config{LogLevel: "info", LogEncoding: "json"})
 		Expect(err).To(BeNil())
 		// Push caller stack out once for each indirection
-		indirectLogger := logger.WithIndirectCaller().WithIndirectCaller().WithIndirectCaller()
+		indirectLogger := logger.WithIndirectCaller(3)
 
 		log3 := func(message string) { indirectLogger.Info(message) }
 		log2 := func(message string) { log3(message) }

@@ -33,8 +33,12 @@ func adaptReplayShim(shim *replayShim) ReplayLogger {
 	return &replayShimAdapter{adaptShim(shim), shim}
 }
 
-func (sa *shimAdapter) WithIndirectCaller() Logger {
-	return &shimAdapter{shim: sa.shim, depth: sa.depth + 1}
+func (sa *shimAdapter) WithIndirectCaller(frames int) Logger {
+	if frames <= 0 {
+		panic("WithIndirectCaller called with invalid frame count")
+	}
+
+	return &shimAdapter{shim: sa.shim, depth: sa.depth + frames}
 }
 
 func (sa *shimAdapter) WithFields(fields LogFields) Logger {

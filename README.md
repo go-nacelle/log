@@ -36,7 +36,7 @@ Sometimes it is useful to define helper functions that logs messages for you in 
 
 ```go
 func logForMe(message string) {
-    parentLogger.WithIndirectCaller().Log(message)
+    parentLogger.WithIndirectCaller(1).Log(message)
 }
 
 logForMe("foobar")
