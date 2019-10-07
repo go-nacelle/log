@@ -65,8 +65,6 @@ func (s *rollupShim) WithFields(fields LogFields) logShim {
 }
 
 func (s *rollupShim) LogWithFields(level LogLevel, fields LogFields, format string, args ...interface{}) {
-	fields = addCaller(fields)
-
 	if s.getWindow(format).record(s.logger, s.clock, s.windowDuration, level, fields, format, args...) {
 		// Not rolling up, log immediately
 		s.logger.LogWithFields(level, fields, format, args...)
@@ -113,6 +111,10 @@ func (w *logWindow) record(
 	format string,
 	args ...interface{},
 ) bool {
+	if fields == nil {
+		fields = LogFields{}
+	}
+
 	w.mutex.Lock()
 	defer w.mutex.Unlock()
 

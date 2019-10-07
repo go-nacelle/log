@@ -57,7 +57,7 @@ func (ts *testShim) LogWithFields(level LogLevel, fields LogFields, format strin
 
 	ts.messages = append(ts.messages, &logMessage{
 		level:  level,
-		fields: addCaller(fields),
+		fields: fields,
 		format: format,
 		args:   args,
 	})

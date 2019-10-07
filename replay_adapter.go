@@ -77,8 +77,6 @@ func (s *replayShim) WithFields(fields LogFields) logShim {
 }
 
 func (s *replayShim) LogWithFields(level LogLevel, fields LogFields, format string, args ...interface{}) {
-	fields = addCaller(fields)
-
 	// Log immediately
 	s.logger.LogWithFields(level, fields, format, args...)
 
