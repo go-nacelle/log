@@ -56,8 +56,8 @@ func newConsoleTemplate(
 
 	fieldsTemplate := fmt.Sprintf(
 		""+
-			`{{if .Fields}}`+
-			`{{range $key, $val := .Fields}}`+
+			`{{if .fields}}`+
+			`{{range $key, $val := .fields}}`+
 			`{{if shouldDisplayAttr $key}}`+
 			`%s{{$key}}%s=%s{{$val}}`+
 			`{{end}}`+
@@ -78,8 +78,8 @@ func newConsoleTemplate(
 	text :=
 		"" +
 			`{{color}}` +
-			`[{{uppercase .LevelName | printf "%1.1s"}}] ` +
-			fmt.Sprintf(`[{{.Timestamp.Format "%s"}}] {{.Message}}`, timeFormat) +
+			`[{{uppercase .levelName | printf "%1.1s"}}] ` +
+			fmt.Sprintf(`[{{.timestamp.Format "%s"}}] {{.message}}`, timeFormat) +
 			`{{reset}}`
 
 	if displayFields {

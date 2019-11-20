@@ -30,11 +30,11 @@ func (l *consoleLogger) Log(timestamp time.Time, level LogLevel, fields LogField
 
 	buffer := bytes.Buffer{}
 	err := l.templates[level].Execute(&buffer, map[string]interface{}{
-		"timestamp":  timestamp,
-		"level":      level,
-		"level_name": level.String(),
-		"message":    msg,
-		"fields":     fields,
+		"timestamp": timestamp,
+		"level":     level,
+		"levelName": level.String(),
+		"message":   msg,
+		"fields":    fields,
 	})
 
 	if err != nil {
