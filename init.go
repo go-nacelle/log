@@ -97,15 +97,16 @@ func newConsoleTemplate(
 
 	templates := map[LogLevel]*template.Template{}
 	for level, color := range colors {
-		functions := template.FuncMap{
-			"color":             color,
-			"reset":             ansi.ColorCode("reset"),
-			"uppercase":         strings.ToUpper,
-			"shouldDisplayAttr": shouldDisplayAttr(blacklist),
+		reset := ""
+		if color != "" {
+			reset = ansi.ColorCode("reset")
 		}
 
-		if color == "" {
-			functions["reset"] = ""
+		functions := template.FuncMap{
+			"color":             stringFunc(color),
+			"reset":             stringFunc(reset),
+			"uppercase":         strings.ToUpper,
+			"shouldDisplayAttr": shouldDisplayAttr(blacklist),
 		}
 
 		parsed, err := template.New(level.String()).Funcs(functions).Parse(text)
@@ -117,6 +118,10 @@ func newConsoleTemplate(
 	}
 
 	return templates, nil
+}
+
+func stringFunc(value string) func() string {
+	return func() string { return value }
 }
 
 func shouldDisplayAttr(blacklist []string) func(string) bool {
