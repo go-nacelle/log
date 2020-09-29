@@ -2,18 +2,16 @@ package log
 
 import (
 	"bytes"
+	"testing"
 	"text/template"
 	"time"
 
-	"github.com/aphistic/sweet"
-	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/assert"
 )
 
-type ConsoleLoggerSuite struct{}
-
-func (s *ConsoleLoggerSuite) TestLevel(t sweet.T) {
+func TestConsoleLoggerrLevel(t *testing.T) {
 	parsed, err := template.New("test").Parse("test: {{.message}}")
-	Expect(err).To(BeNil())
+	assert.Nil(t, err)
 
 	var (
 		templates = map[LogLevel]*template.Template{LevelInfo: parsed}
@@ -31,12 +29,12 @@ func (s *ConsoleLoggerSuite) TestLevel(t sweet.T) {
 		"test 1234",
 	)
 
-	Expect(string(buffer.Bytes())).To(Equal("test: test 1234\n"))
+	assert.Equal(t, "test: test 1234\n", string(buffer.Bytes()))
 }
 
-func (s *ConsoleLoggerSuite) TestColorDisabled(t sweet.T) {
+func TestConsoleLoggerColorDisabled(t *testing.T) {
 	parsed, err := template.New("test").Parse("test: {{.message}}")
-	Expect(err).To(BeNil())
+	assert.Nil(t, err)
 
 	var (
 		templates = map[LogLevel]*template.Template{LevelNone: parsed}
@@ -54,5 +52,5 @@ func (s *ConsoleLoggerSuite) TestColorDisabled(t sweet.T) {
 		"test 1234",
 	)
 
-	Expect(string(buffer.Bytes())).To(Equal("test: test 1234\n"))
+	assert.Equal(t, "test: test 1234\n", string(buffer.Bytes()))
 }

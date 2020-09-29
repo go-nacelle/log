@@ -1,16 +1,14 @@
 package log
 
 import (
+	"testing"
 	"time"
 
-	"github.com/aphistic/sweet"
 	"github.com/efritz/glock"
-	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/assert"
 )
 
-type RollupSuite struct{}
-
-func (s *RollupSuite) TestRollupSimilarMessages(t sweet.T) {
+func TestRollupAdapterSimilarMessages(t *testing.T) {
 	var (
 		shim    = &testShim{}
 		clock   = glock.NewMockClock()
@@ -20,21 +18,21 @@ func (s *RollupSuite) TestRollupSimilarMessages(t sweet.T) {
 	for i := 1; i <= 20; i++ {
 		// Logged, starting window
 		adapter.LogWithFields(LevelDebug, nil, "a")
-		Expect(shim.copy()).To(HaveLen(2*i - 1))
+		assert.Len(t, shim.copy(), 2*i-1)
 
 		// Stashed
 		adapter.LogWithFields(LevelDebug, nil, "a")
 		adapter.LogWithFields(LevelDebug, nil, "a")
-		Expect(shim.copy()).To(HaveLen(2*i - 1))
+		assert.Len(t, shim.copy(), 2*i-1)
 
 		// Flushed
 		clock.BlockingAdvance(time.Second)
-		Eventually(shim.copy).Should(HaveLen(2 * i))
-		Expect(shim.copy()[2*i-1].fields[FieldRollup]).To(Equal(2))
+		assert.Eventually(t, func() bool { return len(shim.copy()) == 2*i }, time.Second, 10*time.Millisecond)
+		assert.Equal(t, 2, shim.copy()[2*i-1].fields[FieldRollup])
 	}
 }
 
-func (s *RollupSuite) TestRollupInactivity(t sweet.T) {
+func TestRollupAdapterInactivity(t *testing.T) {
 	var (
 		shim    = &testShim{}
 		clock   = glock.NewMockClock()
@@ -47,10 +45,10 @@ func (s *RollupSuite) TestRollupInactivity(t sweet.T) {
 	}
 
 	// All messages present
-	Eventually(shim.copy).Should(HaveLen(20))
+	assert.Eventually(t, func() bool { return len(shim.copy()) == 20 }, time.Second, 10*time.Millisecond)
 }
 
-func (s *RollupSuite) TestRollupFlushesRelativeToFirstMessage(t sweet.T) {
+func TestRollupAdapterFlushesRelativeToFirstMessage(t *testing.T) {
 	var (
 		shim    = &testShim{}
 		clock   = glock.NewMockClock()
@@ -66,10 +64,10 @@ func (s *RollupSuite) TestRollupFlushesRelativeToFirstMessage(t sweet.T) {
 	}
 
 	clock.BlockingAdvance(time.Millisecond * 50)
-	Eventually(shim.copy).Should(HaveLen(2))
+	assert.Eventually(t, func() bool { return len(shim.copy()) == 2 }, time.Second, 10*time.Millisecond)
 }
 
-func (s *RollupSuite) TestAllDistinctMessages(t sweet.T) {
+func TestRollupAdapterAllDistinctMessages(t *testing.T) {
 	var (
 		shim    = &testShim{}
 		clock   = glock.NewMockClock()
@@ -82,5 +80,5 @@ func (s *RollupSuite) TestAllDistinctMessages(t sweet.T) {
 		adapter.LogWithFields(LevelDebug, nil, "c")
 	}
 
-	Expect(shim.copy()).To(HaveLen(3))
+	assert.Len(t, shim.copy(), 3)
 }

@@ -4,14 +4,29 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"testing"
 	"time"
 
-	"github.com/aphistic/sweet"
 	"github.com/efritz/glock"
-	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/assert"
 )
 
-type CallerSuite struct{}
+func TestCallerLogger(t *testing.T)                  { testBasic(t, InitLogger) }
+func TestCallerAdapter(t *testing.T)                 { testAdapter(t, InitLogger) }
+func TestCallerLoggerWithFields(t *testing.T)        { testFields(t, InitLogger) }
+func TestCallerLoggerWithReplayAdapter(t *testing.T) { testReplayAdapter(t, InitLogger) }
+func TestCallerLoggerWithRollupAdapter(t *testing.T) { testRollupAdapter(t, InitLogger) }
+func TestCallerLoggerReplay(t *testing.T)            { testReplay(t, InitLogger) }
+func TestCallerLoggerRollup(t *testing.T)            { testRollup(t, InitLogger) }
+
+func TestCallerTrimPath(t *testing.T) {
+	assert.Equal(t, "", trimPath(""))
+	assert.Equal(t, "/", trimPath("/"))
+	assert.Equal(t, "/foo", trimPath("/foo"))
+	assert.Equal(t, "foo/bar", trimPath("/foo/bar"))
+	assert.Equal(t, "bar/baz", trimPath("/foo/bar/baz"))
+	assert.Equal(t, "baz/bonk", trimPath("/foo/bar/baz/bonk"))
+}
 
 var (
 	testFields1 = LogFields{"A": 1}
@@ -19,10 +34,10 @@ var (
 	testFields3 = LogFields{"C": 3}
 )
 
-func (s *CallerSuite) testBasic(init func(*Config) (Logger, error)) {
+func testBasic(t *testing.T, init func(*Config) (Logger, error)) {
 	stderr := captureStderr(func() {
 		logger, err := init(&Config{LogLevel: "info", LogEncoding: "json"})
-		Expect(err).To(BeNil())
+		assert.Nil(t, err)
 
 		logger.Info("X")
 		logger.InfoWithFields(LogFields{"empty": false}, "Y")
@@ -31,7 +46,7 @@ func (s *CallerSuite) testBasic(init func(*Config) (Logger, error)) {
 	})
 
 	lines := strings.Split(strings.TrimSpace(stderr), "\n")
-	Expect(lines).To(HaveLen(3))
+	assert.Len(t, lines, 3)
 
 	var (
 		data1 = LogFields{}
@@ -39,24 +54,24 @@ func (s *CallerSuite) testBasic(init func(*Config) (Logger, error)) {
 		data3 = LogFields{}
 	)
 
-	Expect(json.Unmarshal([]byte(lines[0]), &data1)).To(BeNil())
-	Expect(json.Unmarshal([]byte(lines[1]), &data2)).To(BeNil())
-	Expect(json.Unmarshal([]byte(lines[2]), &data3)).To(BeNil())
+	assert.Nil(t, json.Unmarshal([]byte(lines[0]), &data1))
+	assert.Nil(t, json.Unmarshal([]byte(lines[1]), &data2))
+	assert.Nil(t, json.Unmarshal([]byte(lines[2]), &data3))
 
 	// Note: this value refers to the line number containing `logger.Info("X")` in
 	// the function literal above. If code is added before that line, this value
 	// must be updated.
-	start := 27
+	start := 42
 
-	Expect(data1["caller"]).To(Equal(fmt.Sprintf("log/caller_test.go:%d", start+0)))
-	Expect(data2["caller"]).To(Equal(fmt.Sprintf("log/caller_test.go:%d", start+1)))
-	Expect(data3["caller"]).To(Equal(fmt.Sprintf("log/caller_test.go:%d", start+2)))
+	assert.Equal(t, fmt.Sprintf("log/caller_test.go:%d", start+0), data1["caller"])
+	assert.Equal(t, fmt.Sprintf("log/caller_test.go:%d", start+1), data2["caller"])
+	assert.Equal(t, fmt.Sprintf("log/caller_test.go:%d", start+2), data3["caller"])
 }
 
-func (s *CallerSuite) testReplay(init func(*Config) (Logger, error)) {
+func testReplay(t *testing.T, init func(*Config) (Logger, error)) {
 	stderr := captureStderr(func() {
 		logger, err := init(&Config{LogLevel: "info", LogEncoding: "json"})
-		Expect(err).To(BeNil())
+		assert.Nil(t, err)
 
 		// Non-replayed messages are below log level - not emitted
 		adapter := NewReplayAdapter(logger, LevelDebug, LevelInfo)
@@ -68,7 +83,7 @@ func (s *CallerSuite) testReplay(init func(*Config) (Logger, error)) {
 	})
 
 	lines := strings.Split(strings.TrimSpace(stderr), "\n")
-	Expect(lines).To(HaveLen(4))
+	assert.Len(t, lines, 4)
 
 	var (
 		data1 = LogFields{}
@@ -76,24 +91,24 @@ func (s *CallerSuite) testReplay(init func(*Config) (Logger, error)) {
 		data3 = LogFields{}
 	)
 
-	Expect(json.Unmarshal([]byte(lines[1]), &data1)).To(BeNil())
-	Expect(json.Unmarshal([]byte(lines[2]), &data2)).To(BeNil())
-	Expect(json.Unmarshal([]byte(lines[3]), &data3)).To(BeNil())
+	assert.Nil(t, json.Unmarshal([]byte(lines[1]), &data1))
+	assert.Nil(t, json.Unmarshal([]byte(lines[2]), &data2))
+	assert.Nil(t, json.Unmarshal([]byte(lines[3]), &data3))
 
 	// Note: this value refers to the line number containing `logger.Info("X")` in
 	// the function literal above. If code is added before that line, this value
 	// must be updated.
-	start := 63
+	start := 78
 
-	Expect(data1["caller"]).To(Equal(fmt.Sprintf("log/caller_test.go:%d", start+0)))
-	Expect(data2["caller"]).To(Equal(fmt.Sprintf("log/caller_test.go:%d", start+1)))
-	Expect(data3["caller"]).To(Equal(fmt.Sprintf("log/caller_test.go:%d", start+2)))
+	assert.Equal(t, fmt.Sprintf("log/caller_test.go:%d", start+0), data1["caller"])
+	assert.Equal(t, fmt.Sprintf("log/caller_test.go:%d", start+1), data2["caller"])
+	assert.Equal(t, fmt.Sprintf("log/caller_test.go:%d", start+2), data3["caller"])
 }
 
-func (s *CallerSuite) testRollup(init func(*Config) (Logger, error)) {
+func testRollup(t *testing.T, init func(*Config) (Logger, error)) {
 	stderr := captureStderr(func() {
 		logger, err := init(&Config{LogLevel: "info", LogEncoding: "json"})
-		Expect(err).To(BeNil())
+		assert.Nil(t, err)
 
 		clock := glock.NewMockClock()
 		adapter := adaptShim(newRollupShim(logger, clock, time.Second))
@@ -107,29 +122,29 @@ func (s *CallerSuite) testRollup(init func(*Config) (Logger, error)) {
 	})
 
 	lines := strings.Split(strings.TrimSpace(stderr), "\n")
-	Expect(lines).To(HaveLen(2))
+	assert.Len(t, lines, 2)
 
 	var (
 		data1 = LogFields{}
 		data2 = LogFields{}
 	)
 
-	Expect(json.Unmarshal([]byte(lines[0]), &data1)).To(BeNil())
-	Expect(json.Unmarshal([]byte(lines[1]), &data2)).To(BeNil())
+	assert.Nil(t, json.Unmarshal([]byte(lines[0]), &data1))
+	assert.Nil(t, json.Unmarshal([]byte(lines[1]), &data2))
 
-	// Note: this value refers to the line number containing `logger.Info("X")` in
-	// the function literal above. If code is added before that line, this value
-	// must be updated.
-	start := 100
+	// Note: this value refers to the line number containing the first instance
+	// of `logger.Info("A")` in the function literal above. If code is added
+	// before that line, this value must be updated.
+	start := 115
 
-	Expect(data1["caller"]).To(Equal(fmt.Sprintf("log/caller_test.go:%d", start)))
-	Expect(data2["caller"]).To(Equal(fmt.Sprintf("log/caller_test.go:%d", start)))
+	assert.Equal(t, fmt.Sprintf("log/caller_test.go:%d", start), data1["caller"])
+	assert.Equal(t, fmt.Sprintf("log/caller_test.go:%d", start), data2["caller"])
 }
 
-func (s *CallerSuite) testAdapter(init func(*Config) (Logger, error)) {
+func testAdapter(t *testing.T, init func(*Config) (Logger, error)) {
 	stderr := captureStderr(func() {
 		logger, err := init(&Config{LogLevel: "info", LogEncoding: "json"})
-		Expect(err).To(BeNil())
+		assert.Nil(t, err)
 		// Push caller stack out once for each indirection
 		indirectLogger := logger.WithIndirectCaller(3)
 
@@ -144,7 +159,7 @@ func (s *CallerSuite) testAdapter(init func(*Config) (Logger, error)) {
 	})
 
 	lines := strings.Split(strings.TrimSpace(stderr), "\n")
-	Expect(lines).To(HaveLen(3))
+	assert.Len(t, lines, 3)
 
 	var (
 		data1 = LogFields{}
@@ -152,22 +167,22 @@ func (s *CallerSuite) testAdapter(init func(*Config) (Logger, error)) {
 		data3 = LogFields{}
 	)
 
-	Expect(json.Unmarshal([]byte(lines[0]), &data1)).To(BeNil())
-	Expect(json.Unmarshal([]byte(lines[1]), &data2)).To(BeNil())
-	Expect(json.Unmarshal([]byte(lines[2]), &data3)).To(BeNil())
+	assert.Nil(t, json.Unmarshal([]byte(lines[0]), &data1))
+	assert.Nil(t, json.Unmarshal([]byte(lines[1]), &data2))
+	assert.Nil(t, json.Unmarshal([]byte(lines[2]), &data3))
 
 	// Note: this value refers to the line number containing `logger.Info("X")` in
 	// the function literal above. If code is added before that line, this value
 	// must be updated.
-	start := 140
+	start := 155
 
-	Expect(data1["caller"]).To(Equal(fmt.Sprintf("log/caller_test.go:%d", start+0)))
-	Expect(data2["caller"]).To(Equal(fmt.Sprintf("log/caller_test.go:%d", start+1)))
-	Expect(data3["caller"]).To(Equal(fmt.Sprintf("log/caller_test.go:%d", start+2)))
+	assert.Equal(t, fmt.Sprintf("log/caller_test.go:%d", start+0), data1["caller"])
+	assert.Equal(t, fmt.Sprintf("log/caller_test.go:%d", start+1), data2["caller"])
+	assert.Equal(t, fmt.Sprintf("log/caller_test.go:%d", start+2), data3["caller"])
 }
 
-func (s *CallerSuite) testFields(init func(*Config) (Logger, error)) {
-	s.testBasic(func(config *Config) (Logger, error) {
+func testFields(t *testing.T, init func(*Config) (Logger, error)) {
+	testBasic(t, func(config *Config) (Logger, error) {
 		logger, err := init(config)
 		if err != nil {
 			return nil, err
@@ -177,8 +192,8 @@ func (s *CallerSuite) testFields(init func(*Config) (Logger, error)) {
 	})
 }
 
-func (s *CallerSuite) testReplayAdapter(init func(*Config) (Logger, error)) {
-	s.testBasic(func(config *Config) (Logger, error) {
+func testReplayAdapter(t *testing.T, init func(*Config) (Logger, error)) {
+	testBasic(t, func(config *Config) (Logger, error) {
 		logger, err := init(config)
 		if err != nil {
 			return nil, err
@@ -188,8 +203,8 @@ func (s *CallerSuite) testReplayAdapter(init func(*Config) (Logger, error)) {
 	})
 }
 
-func (s *CallerSuite) testRollupAdapter(init func(*Config) (Logger, error)) {
-	s.testBasic(func(config *Config) (Logger, error) {
+func testRollupAdapter(t *testing.T, init func(*Config) (Logger, error)) {
+	testBasic(t, func(config *Config) (Logger, error) {
 		logger, err := init(config)
 		if err != nil {
 			return nil, err
@@ -198,23 +213,3 @@ func (s *CallerSuite) testRollupAdapter(init func(*Config) (Logger, error)) {
 		return NewRollupAdapter(NewRollupAdapter(NewRollupAdapter(logger, time.Second), time.Second), time.Second), nil
 	})
 }
-
-//
-// Real Tests
-
-func (s *CallerSuite) TestTrimPath(t sweet.T) {
-	Expect(trimPath("")).To(Equal(""))
-	Expect(trimPath("/")).To(Equal("/"))
-	Expect(trimPath("/foo")).To(Equal("/foo"))
-	Expect(trimPath("/foo/bar")).To(Equal("foo/bar"))
-	Expect(trimPath("/foo/bar/baz")).To(Equal("bar/baz"))
-	Expect(trimPath("/foo/bar/baz/bonk")).To(Equal("baz/bonk"))
-}
-
-func (s *CallerSuite) TestLogger(t sweet.T)                  { s.testBasic(InitLogger) }
-func (s *CallerSuite) TestAdapter(t sweet.T)                 { s.testAdapter(InitLogger) }
-func (s *CallerSuite) TestLoggerWithFields(t sweet.T)        { s.testFields(InitLogger) }
-func (s *CallerSuite) TestLoggerWithReplayAdapter(t sweet.T) { s.testReplayAdapter(InitLogger) }
-func (s *CallerSuite) TestLoggerWithRollupAdapter(t sweet.T) { s.testRollupAdapter(InitLogger) }
-func (s *CallerSuite) TestLoggerReplay(t sweet.T)            { s.testReplay(InitLogger) }
-func (s *CallerSuite) TestLoggerRollup(t sweet.T)            { s.testRollup(InitLogger) }

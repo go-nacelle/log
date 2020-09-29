@@ -3,15 +3,13 @@ package log
 import (
 	"bytes"
 	"fmt"
+	"testing"
 	"time"
 
-	"github.com/aphistic/sweet"
-	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/assert"
 )
 
-type JSONLoggerSuite struct{}
-
-func (s *JSONLoggerSuite) TestLog(t sweet.T) {
+func TestJSONLoggerLog(t *testing.T) {
 	var (
 		logger    = newJSONLogger(nil)
 		buffer    = bytes.NewBuffer(nil)
@@ -27,15 +25,17 @@ func (s *JSONLoggerSuite) TestLog(t sweet.T) {
 		"test 1234",
 	)
 
-	Expect(string(buffer.Bytes())).To(MatchJSON(fmt.Sprintf(`{
+	expected := fmt.Sprintf(`{
 		"level": "fatal",
 		"message": "test 1234",
 		"timestamp": "%s",
 		"attr1": 4321
-	}`, timestamp.Format(JSONTimeFormat))))
+	}`, timestamp.Format(JSONTimeFormat))
+
+	assert.JSONEq(t, expected, string(buffer.Bytes()))
 }
 
-func (s *JSONLoggerSuite) TestCustomFieldNames(t sweet.T) {
+func TestJSONLoggerCustomFieldNames(t *testing.T) {
 	var (
 		logger = newJSONLogger(map[string]string{
 			"timestamp": "@timestamp",
@@ -54,10 +54,12 @@ func (s *JSONLoggerSuite) TestCustomFieldNames(t sweet.T) {
 		"test 1234",
 	)
 
-	Expect(string(buffer.Bytes())).To(MatchJSON(fmt.Sprintf(`{
+	expected := fmt.Sprintf(`{
 		"log_level": "fatal",
 		"message": "test 1234",
 		"@timestamp": "%s",
 		"attr1": 4321
-	}`, timestamp.Format(JSONTimeFormat))))
+	}`, timestamp.Format(JSONTimeFormat))
+
+	assert.JSONEq(t, expected, string(buffer.Bytes()))
 }
