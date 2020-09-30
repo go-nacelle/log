@@ -3,7 +3,7 @@ package log
 import (
 	"sync"
 
-	"github.com/efritz/glock"
+	"github.com/derision-test/glock"
 )
 
 // FieldReplay is a field assigned to a message that has

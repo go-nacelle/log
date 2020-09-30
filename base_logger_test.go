@@ -1,12 +1,10 @@
 package log
 
-//go:generate go-mockgen -f github.com/go-nacelle/log -i baseLogger -o base_logger_mock_test.go
-
 import (
 	"testing"
 
-	"github.com/efritz/glock"
-	mockassert "github.com/efritz/go-mockgen/assert"
+	"github.com/derision-test/glock"
+	mockassert "github.com/derision-test/go-mockgen/testutil/assert"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -18,7 +16,7 @@ func (s *BaseLoggerSuite) TestLogFormat(t *testing.T) {
 	logger := newTestShim(base, LevelDebug, nil, clock, func() {})
 	logger.LogWithFields(LevelInfo, nil, "test %d %d %d", 1, 2, 3)
 
-	mockassert.CalledOnceMatching(t, base.LogFunc, func(t assert.TestingT, call interface{}) bool {
+	mockassert.CalledOnceWith(t, base.LogFunc, func(t assert.TestingT, call interface{}) bool {
 		c := call.(BaseLoggerLogFuncCall)
 		// TODO - ergonomics
 		return c.Arg0 == clock.Now().UTC() &&
@@ -42,7 +40,7 @@ func (s *BaseLoggerSuite) TestWrappedLoggers(t *testing.T) {
 	wrappedLogger.LogWithFields(LevelDebug, LogFields{"extra": "baz"}, "test %d %d %d", 1, 2, 3)
 	logger.LogWithFields(LevelDebug, LogFields{"extra": "bonk"}, "test %d %d %d", 1, 2, 3)
 
-	mockassert.CalledOnceMatching(t, base.LogFunc, func(t assert.TestingT, call interface{}) bool {
+	mockassert.CalledOnceWith(t, base.LogFunc, func(t assert.TestingT, call interface{}) bool {
 		c := call.(BaseLoggerLogFuncCall)
 		// TODO - ergonomics
 		return c.Arg0 == clock.Now().UTC() &&
@@ -60,7 +58,7 @@ func (s *BaseLoggerSuite) TestWrappedLoggers(t *testing.T) {
 			c.Arg3 == "test 1 2 3"
 	})
 
-	mockassert.CalledOnceMatching(t, base.LogFunc, func(t assert.TestingT, call interface{}) bool {
+	mockassert.CalledOnceWith(t, base.LogFunc, func(t assert.TestingT, call interface{}) bool {
 		c := call.(BaseLoggerLogFuncCall)
 		// TODO - ergonomics
 		return c.Arg0 == clock.Now().UTC() &&

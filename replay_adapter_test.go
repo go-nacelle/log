@@ -3,7 +3,7 @@ package log
 import (
 	"testing"
 
-	"github.com/efritz/glock"
+	"github.com/derision-test/glock"
 	"github.com/stretchr/testify/assert"
 )
 
