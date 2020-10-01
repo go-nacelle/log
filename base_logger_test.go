@@ -16,20 +16,18 @@ func (s *BaseLoggerSuite) TestLogFormat(t *testing.T) {
 	logger := newTestShim(base, LevelDebug, nil, clock, func() {})
 	logger.LogWithFields(LevelInfo, nil, "test %d %d %d", 1, 2, 3)
 
-	mockassert.CalledOnceWith(t, base.LogFunc, func(t assert.TestingT, call interface{}) bool {
-		c := call.(BaseLoggerLogFuncCall)
-		// TODO - ergonomics
-		return c.Arg0 == clock.Now().UTC() &&
-			c.Arg1 == LevelInfo &&
-			assert.ObjectsAreEqual(LogFields{
-				// Note: this value refers to the line number containing `LogWithFields` in
-				// the test setup above. If code is added before that line, this value must
-				// be updated.
-				"caller":         "log/base_logger_test.go:18",
-				"sequenceNumber": uint64(1),
-			}, c.Arg2) &&
-			c.Arg3 == "test 1 2 3"
-	})
+	mockassert.CalledOnceWith(t, base.LogFunc, mockassert.Values(
+		clock.Now().UTC(),
+		LevelInfo,
+		LogFields{
+			// Note: this value refers to the line number containing `LogWithFields` in
+			// the test setup above. If code is added before that line, this value must
+			// be updated.
+			"caller":         "log/base_logger_test.go:18",
+			"sequenceNumber": uint64(1),
+		},
+		"test 1 2 3",
+	))
 }
 
 func (s *BaseLoggerSuite) TestWrappedLoggers(t *testing.T) {
@@ -40,40 +38,36 @@ func (s *BaseLoggerSuite) TestWrappedLoggers(t *testing.T) {
 	wrappedLogger.LogWithFields(LevelDebug, LogFields{"extra": "baz"}, "test %d %d %d", 1, 2, 3)
 	logger.LogWithFields(LevelDebug, LogFields{"extra": "bonk"}, "test %d %d %d", 1, 2, 3)
 
-	mockassert.CalledOnceWith(t, base.LogFunc, func(t assert.TestingT, call interface{}) bool {
-		c := call.(BaseLoggerLogFuncCall)
-		// TODO - ergonomics
-		return c.Arg0 == clock.Now().UTC() &&
-			c.Arg1 == LevelDebug &&
-			assert.ObjectsAreEqual(LogFields{
-				"init":    "foo",
-				"wrapped": "bar",
-				"extra":   "baz",
-				// Note: this value refers to the line number containing `LogWithFields` in
-				// the test setup above. If code is added before that line, this value must
-				// be updated.
-				"caller":         "log/base_logger_test.go:39",
-				"sequenceNumber": uint64(1),
-			}, c.Arg2) &&
-			c.Arg3 == "test 1 2 3"
-	})
+	mockassert.CalledOnceWith(t, base.LogFunc, mockassert.Values(
+		clock.Now().UTC(),
+		LevelDebug,
+		LogFields{
+			"init":    "foo",
+			"wrapped": "bar",
+			"extra":   "baz",
+			// Note: this value refers to the line number containing `LogWithFields` in
+			// the test setup above. If code is added before that line, this value must
+			// be updated.
+			"caller":         "log/base_logger_test.go:39",
+			"sequenceNumber": uint64(1),
+		},
+		"test 1 2 3",
+	))
 
-	mockassert.CalledOnceWith(t, base.LogFunc, func(t assert.TestingT, call interface{}) bool {
-		c := call.(BaseLoggerLogFuncCall)
-		// TODO - ergonomics
-		return c.Arg0 == clock.Now().UTC() &&
-			c.Arg1 == LevelDebug &&
-			assert.ObjectsAreEqual(LogFields{
-				"init":  "foo",
-				"extra": "bonk",
-				// Note: this value refers to the line number containing `LogWithFields` in
-				// the test setup above. If code is added before that line, this value must
-				// be updated.
-				"caller":         "log/base_logger_test.go:40",
-				"sequenceNumber": uint64(2),
-			}, c.Arg2) &&
-			c.Arg3 == "test 1 2 3"
-	})
+	mockassert.CalledOnceWith(t, base.LogFunc, mockassert.Values(
+		clock.Now().UTC(),
+		LevelDebug,
+		LogFields{
+			"init":  "foo",
+			"extra": "bonk",
+			// Note: this value refers to the line number containing `LogWithFields` in
+			// the test setup above. If code is added before that line, this value must
+			// be updated.
+			"caller":         "log/base_logger_test.go:40",
+			"sequenceNumber": uint64(2),
+		},
+		"test 1 2 3",
+	))
 }
 
 func (s *BaseLoggerSuite) TestLogLevelFilter(t *testing.T) {
