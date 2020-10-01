@@ -8,18 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// TODO - where else is this?
-// TODO - move to helpers_test.go
-func eventually(t *testing.T, cond func() bool) bool {
-	return assert.Eventually(t, cond, time.Second, 10*time.Millisecond)
-}
-
-func requireEventually(t *testing.T, cond func() bool) {
-	if !eventually(t, cond) {
-		t.FailNow()
-	}
-}
-
 func TestRollupAdapterSimilarMessages(t *testing.T) {
 	shim := &testShim{}
 	clock := glock.NewMockClock()

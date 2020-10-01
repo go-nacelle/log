@@ -24,11 +24,14 @@ func TestFieldsNormalizeTimeValues(t *testing.T) {
 	assert.Equal(t, "bar", fields["foo"])
 	assert.Equal(t, []bool{true, false, true}, fields["bonk"])
 
+	assertTime := func(value interface{}, expected interface{}) {
+		actual, _ := time.Parse(JSONTimeFormat, value.(string))
+		assert.Equal(t, expected, actual)
+	}
+
 	// Times converted to ISO 8601
-	tx, _ := time.Parse(JSONTimeFormat, fields["bar"].(string)) // TODO - clean this up
-	assert.Equal(t, t1, tx)
-	tx, _ = time.Parse(JSONTimeFormat, fields["baz"].(string)) // TODO - clean this up
-	assert.Equal(t, t2, tx)
+	assertTime(fields["bar"], t1)
+	assertTime(fields["baz"], t2)
 }
 
 func TestFieldsNormalizeTimeValuesOnNilFields(t *testing.T) {
