@@ -8,16 +8,14 @@ import (
 )
 
 func TestFieldsNormalizeTimeValues(t *testing.T) {
-	var (
-		t1     = time.Unix(1503939881, 0)
-		t2     = time.Unix(1503939891, 0)
-		fields = LogFields{
-			"foo":  "bar",
-			"bar":  t1,
-			"baz":  t2,
-			"bonk": []bool{true, false, true},
-		}
-	)
+	t1 := time.Unix(1503939881, 0)
+	t2 := time.Unix(1503939891, 0)
+	fields := LogFields{
+		"foo":  "bar",
+		"bar":  t1,
+		"baz":  t2,
+		"bonk": []bool{true, false, true},
+	}
 
 	// Modifies object in-place
 	assert.Equal(t, fields, fields.normalizeTimeValues())

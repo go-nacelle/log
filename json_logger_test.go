@@ -10,12 +10,9 @@ import (
 )
 
 func TestJSONLoggerLog(t *testing.T) {
-	var (
-		logger    = newJSONLogger(nil)
-		buffer    = bytes.NewBuffer(nil)
-		timestamp = time.Unix(1503939881, 0)
-	)
-
+	logger := newJSONLogger(nil)
+	buffer := bytes.NewBuffer(nil)
+	timestamp := time.Unix(1503939881, 0)
 	logger.stream = buffer
 
 	logger.Log(
@@ -36,15 +33,12 @@ func TestJSONLoggerLog(t *testing.T) {
 }
 
 func TestJSONLoggerCustomFieldNames(t *testing.T) {
-	var (
-		logger = newJSONLogger(map[string]string{
-			"timestamp": "@timestamp",
-			"level":     "log_level",
-		})
-		buffer    = bytes.NewBuffer(nil)
-		timestamp = time.Unix(1503939881, 0)
-	)
-
+	logger := newJSONLogger(map[string]string{
+		"timestamp": "@timestamp",
+		"level":     "log_level",
+	})
+	buffer := bytes.NewBuffer(nil)
+	timestamp := time.Unix(1503939881, 0)
 	logger.stream = buffer
 
 	logger.Log(

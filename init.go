@@ -42,11 +42,9 @@ func newConsoleTemplate(
 	displayMultilineFields bool,
 	blacklist []string,
 ) (map[LogLevel]*template.Template, error) {
-	var (
-		fieldPrefix  = " "
-		fieldPadding = ""
-		fieldSuffix  = ""
-	)
+	fieldPrefix := " "
+	fieldPadding := ""
+	fieldSuffix := ""
 
 	if displayMultilineFields {
 		fieldPrefix = "\n    "

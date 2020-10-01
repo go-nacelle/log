@@ -7,18 +7,17 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestConsoleLoggerrLevel(t *testing.T) {
 	parsed, err := template.New("test").Parse("test: {{.message}}")
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
-	var (
-		templates = map[LogLevel]*template.Template{LevelInfo: parsed}
-		logger    = newConsoleLogger(templates, true)
-		buffer    = bytes.NewBuffer(nil)
-		timestamp = time.Unix(1503939881, 0)
-	)
+	templates := map[LogLevel]*template.Template{LevelInfo: parsed}
+	logger := newConsoleLogger(templates, true)
+	buffer := bytes.NewBuffer(nil)
+	timestamp := time.Unix(1503939881, 0)
 
 	logger.stream = buffer
 
@@ -34,14 +33,12 @@ func TestConsoleLoggerrLevel(t *testing.T) {
 
 func TestConsoleLoggerColorDisabled(t *testing.T) {
 	parsed, err := template.New("test").Parse("test: {{.message}}")
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
-	var (
-		templates = map[LogLevel]*template.Template{LevelNone: parsed}
-		logger    = newConsoleLogger(templates, false)
-		buffer    = bytes.NewBuffer(nil)
-		timestamp = time.Unix(1503939881, 0)
-	)
+	templates := map[LogLevel]*template.Template{LevelNone: parsed}
+	logger := newConsoleLogger(templates, false)
+	buffer := bytes.NewBuffer(nil)
+	timestamp := time.Unix(1503939881, 0)
 
 	logger.stream = buffer
 

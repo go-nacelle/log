@@ -60,10 +60,8 @@ func captureStderr(f func()) string {
 func read(reader io.Reader, ch chan<- string) {
 	defer close(ch)
 
-	var (
-		buffer  = bytes.Buffer{}
-		scanner = bufio.NewScanner(reader)
-	)
+	buffer := bytes.Buffer{}
+	scanner := bufio.NewScanner(reader)
 
 	for scanner.Scan() {
 		line := scanner.Text()

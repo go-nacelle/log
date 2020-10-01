@@ -5,14 +5,13 @@ import (
 
 	"github.com/derision-test/glock"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestReplayAdapter(t *testing.T) {
-	var (
-		shim    = &testShim{}
-		clock   = glock.NewMockClock()
-		adapter = newReplayShim(adaptShim(shim), clock, LevelDebug)
-	)
+	shim := &testShim{}
+	clock := glock.NewMockClock()
+	adapter := newReplayShim(adaptShim(shim), clock, LevelDebug)
 
 	adapter.LogWithFields(LevelDebug, LogFields{"x": "x"}, "foo", 12)
 	adapter.LogWithFields(LevelDebug, LogFields{"y": "y"}, "bar", 43)
@@ -20,7 +19,7 @@ func TestReplayAdapter(t *testing.T) {
 	adapter.Replay(LevelWarning)
 
 	messages := shim.copy()
-	assert.Len(t, messages, 6)
+	require.Len(t, messages, 6)
 
 	for i := 0; i < 3; i++ {
 		assert.Equal(t, LevelDebug, messages[i+0].level)
@@ -44,11 +43,9 @@ func TestReplayAdapter(t *testing.T) {
 }
 
 func TestReplayAdapterTwice(t *testing.T) {
-	var (
-		shim    = &testShim{}
-		clock   = glock.NewMockClock()
-		adapter = newReplayShim(adaptShim(shim), clock, LevelDebug)
-	)
+	shim := &testShim{}
+	clock := glock.NewMockClock()
+	adapter := newReplayShim(adaptShim(shim), clock, LevelDebug)
 
 	adapter.LogWithFields(LevelDebug, nil, "foo")
 	adapter.LogWithFields(LevelDebug, nil, "bar")
@@ -57,7 +54,7 @@ func TestReplayAdapterTwice(t *testing.T) {
 	adapter.Replay(LevelError)
 
 	messages := shim.copy()
-	assert.Len(t, messages, 9)
+	require.Len(t, messages, 9)
 	assert.Equal(t, LevelDebug, messages[0].level)
 	assert.Equal(t, LevelDebug, messages[1].level)
 	assert.Equal(t, LevelDebug, messages[2].level)
@@ -74,11 +71,9 @@ func TestReplayAdapterTwice(t *testing.T) {
 }
 
 func TestReplayAdapterAtHigherlevelNoops(t *testing.T) {
-	var (
-		shim    = &testShim{}
-		clock   = glock.NewMockClock()
-		adapter = newReplayShim(adaptShim(shim), clock, LevelDebug)
-	)
+	shim := &testShim{}
+	clock := glock.NewMockClock()
+	adapter := newReplayShim(adaptShim(shim), clock, LevelDebug)
 
 	adapter.LogWithFields(LevelDebug, nil, "foo")
 	adapter.LogWithFields(LevelDebug, nil, "bar")
@@ -87,7 +82,7 @@ func TestReplayAdapterAtHigherlevelNoops(t *testing.T) {
 	adapter.Replay(LevelWarning)
 
 	messages := shim.copy()
-	assert.Len(t, messages, 6)
+	require.Len(t, messages, 6)
 	assert.Equal(t, LevelDebug, messages[0].level)
 	assert.Equal(t, LevelDebug, messages[1].level)
 	assert.Equal(t, LevelDebug, messages[2].level)
@@ -101,11 +96,9 @@ func TestReplayAdapterAtHigherlevelNoops(t *testing.T) {
 }
 
 func TestReplayAdapterLogAfterReplaySendsImmediately(t *testing.T) {
-	var (
-		shim    = &testShim{}
-		clock   = glock.NewMockClock()
-		adapter = newReplayShim(adaptShim(shim), clock, LevelDebug)
-	)
+	shim := &testShim{}
+	clock := glock.NewMockClock()
+	adapter := newReplayShim(adaptShim(shim), clock, LevelDebug)
 
 	adapter.LogWithFields(LevelDebug, nil, "foo")
 	adapter.LogWithFields(LevelDebug, nil, "bar")
@@ -115,7 +108,7 @@ func TestReplayAdapterLogAfterReplaySendsImmediately(t *testing.T) {
 	adapter.LogWithFields(LevelDebug, nil, "qux")
 
 	messages := shim.copy()
-	assert.Len(t, messages, 10)
+	require.Len(t, messages, 10)
 	assert.Equal(t, LevelDebug, messages[0].level)
 	assert.Equal(t, LevelDebug, messages[1].level)
 	assert.Equal(t, LevelDebug, messages[2].level)
@@ -133,11 +126,9 @@ func TestReplayAdapterLogAfterReplaySendsImmediately(t *testing.T) {
 }
 
 func TestReplayAdapterLogAfterSecondReplaySendsAtNewLevel(t *testing.T) {
-	var (
-		shim    = &testShim{}
-		clock   = glock.NewMockClock()
-		adapter = newReplayShim(adaptShim(shim), clock, LevelDebug)
-	)
+	shim := &testShim{}
+	clock := glock.NewMockClock()
+	adapter := newReplayShim(adaptShim(shim), clock, LevelDebug)
 
 	adapter.LogWithFields(LevelDebug, nil, "foo")
 	adapter.LogWithFields(LevelDebug, nil, "bar")
@@ -147,7 +138,7 @@ func TestReplayAdapterLogAfterSecondReplaySendsAtNewLevel(t *testing.T) {
 	adapter.LogWithFields(LevelDebug, nil, "bnk")
 
 	messages := shim.copy()
-	assert.Len(t, messages, 10)
+	require.Len(t, messages, 10)
 	assert.Equal(t, LevelDebug, messages[0].level)
 	assert.Equal(t, LevelDebug, messages[1].level)
 	assert.Equal(t, LevelWarning, messages[2].level)
@@ -165,11 +156,9 @@ func TestReplayAdapterLogAfterSecondReplaySendsAtNewLevel(t *testing.T) {
 }
 
 func TestReplayAdapterCheckReplayAddsAttribute(t *testing.T) {
-	var (
-		shim    = &testShim{}
-		clock   = glock.NewMockClock()
-		adapter = newReplayShim(adaptShim(shim), clock, LevelDebug, LevelInfo)
-	)
+	shim := &testShim{}
+	clock := glock.NewMockClock()
+	adapter := newReplayShim(adaptShim(shim), clock, LevelDebug, LevelInfo)
 
 	adapter.LogWithFields(LevelDebug, nil, "foo")
 	adapter.LogWithFields(LevelInfo, nil, "bar")
@@ -178,7 +167,7 @@ func TestReplayAdapterCheckReplayAddsAttribute(t *testing.T) {
 	adapter.LogWithFields(LevelDebug, nil, "bonk")
 
 	messages := shim.copy()
-	assert.Len(t, messages, 8)
+	require.Len(t, messages, 8)
 	assert.NotContains(t, messages[0].fields, FieldReplay)
 	assert.NotContains(t, messages[1].fields, FieldReplay)
 	assert.NotContains(t, messages[2].fields, FieldReplay)
@@ -190,11 +179,9 @@ func TestReplayAdapterCheckReplayAddsAttribute(t *testing.T) {
 }
 
 func TestReplayAdapterCheckSecondReplayAddsAttribute(t *testing.T) {
-	var (
-		shim    = &testShim{}
-		clock   = glock.NewMockClock()
-		adapter = newReplayShim(adaptShim(shim), clock, LevelDebug, LevelInfo)
-	)
+	shim := &testShim{}
+	clock := glock.NewMockClock()
+	adapter := newReplayShim(adaptShim(shim), clock, LevelDebug, LevelInfo)
 
 	adapter.LogWithFields(LevelDebug, nil, "foo")
 	adapter.LogWithFields(LevelInfo, nil, "bar")
@@ -203,7 +190,7 @@ func TestReplayAdapterCheckSecondReplayAddsAttribute(t *testing.T) {
 	adapter.LogWithFields(LevelDebug, nil, "bnk")
 
 	messages := shim.copy()
-	assert.Len(t, messages, 8)
+	require.Len(t, messages, 8)
 	assert.NotContains(t, messages[0].fields, FieldReplay)
 	assert.NotContains(t, messages[1].fields, FieldReplay)
 	assert.Equal(t, LevelDebug, messages[2].fields[FieldReplay])

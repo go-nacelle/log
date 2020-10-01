@@ -8,12 +8,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TODO - where else is this?
+// TODO - move to helpers_test.go
+func eventually(t *testing.T, cond func() bool) bool {
+	return assert.Eventually(t, cond, time.Second, 10*time.Millisecond)
+}
+
+func requireEventually(t *testing.T, cond func() bool) {
+	if !eventually(t, cond) {
+		t.FailNow()
+	}
+}
+
 func TestRollupAdapterSimilarMessages(t *testing.T) {
-	var (
-		shim    = &testShim{}
-		clock   = glock.NewMockClock()
-		adapter = newRollupShim(adaptShim(shim), clock, time.Second)
-	)
+	shim := &testShim{}
+	clock := glock.NewMockClock()
+	adapter := newRollupShim(adaptShim(shim), clock, time.Second)
 
 	for i := 1; i <= 20; i++ {
 		// Logged, starting window
@@ -27,17 +37,15 @@ func TestRollupAdapterSimilarMessages(t *testing.T) {
 
 		// Flushed
 		clock.BlockingAdvance(time.Second)
-		assert.Eventually(t, func() bool { return len(shim.copy()) == 2*i }, time.Second, 10*time.Millisecond)
+		requireEventually(t, func() bool { return len(shim.copy()) == 2*i })
 		assert.Equal(t, 2, shim.copy()[2*i-1].fields[FieldRollup])
 	}
 }
 
 func TestRollupAdapterInactivity(t *testing.T) {
-	var (
-		shim    = &testShim{}
-		clock   = glock.NewMockClock()
-		adapter = newRollupShim(adaptShim(shim), clock, time.Second)
-	)
+	shim := &testShim{}
+	clock := glock.NewMockClock()
+	adapter := newRollupShim(adaptShim(shim), clock, time.Second)
 
 	for i := 0; i < 20; i++ {
 		adapter.LogWithFields(LevelDebug, nil, "a")
@@ -45,15 +53,13 @@ func TestRollupAdapterInactivity(t *testing.T) {
 	}
 
 	// All messages present
-	assert.Eventually(t, func() bool { return len(shim.copy()) == 20 }, time.Second, 10*time.Millisecond)
+	eventually(t, func() bool { return len(shim.copy()) == 20 })
 }
 
 func TestRollupAdapterFlushesRelativeToFirstMessage(t *testing.T) {
-	var (
-		shim    = &testShim{}
-		clock   = glock.NewMockClock()
-		adapter = newRollupShim(adaptShim(shim), clock, time.Second)
-	)
+	shim := &testShim{}
+	clock := glock.NewMockClock()
+	adapter := newRollupShim(adaptShim(shim), clock, time.Second)
 
 	adapter.LogWithFields(LevelDebug, nil, "a")
 	clock.Advance(time.Millisecond * 500)
@@ -64,15 +70,13 @@ func TestRollupAdapterFlushesRelativeToFirstMessage(t *testing.T) {
 	}
 
 	clock.BlockingAdvance(time.Millisecond * 50)
-	assert.Eventually(t, func() bool { return len(shim.copy()) == 2 }, time.Second, 10*time.Millisecond)
+	eventually(t, func() bool { return len(shim.copy()) == 2 })
 }
 
 func TestRollupAdapterAllDistinctMessages(t *testing.T) {
-	var (
-		shim    = &testShim{}
-		clock   = glock.NewMockClock()
-		adapter = newRollupShim(adaptShim(shim), clock, time.Second)
-	)
+	shim := &testShim{}
+	clock := glock.NewMockClock()
+	adapter := newRollupShim(adaptShim(shim), clock, time.Second)
 
 	for i := 0; i < 10; i++ {
 		adapter.LogWithFields(LevelDebug, nil, "a")

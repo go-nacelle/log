@@ -9,6 +9,7 @@ import (
 
 	"github.com/derision-test/glock"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCallerLogger(t *testing.T)                  { testBasic(t, InitLogger) }
@@ -37,7 +38,7 @@ var (
 func testBasic(t *testing.T, init func(*Config) (Logger, error)) {
 	stderr := captureStderr(func() {
 		logger, err := init(&Config{LogLevel: "info", LogEncoding: "json"})
-		assert.Nil(t, err)
+		require.Nil(t, err)
 
 		logger.Info("X")
 		logger.InfoWithFields(LogFields{"empty": false}, "Y")
@@ -46,22 +47,19 @@ func testBasic(t *testing.T, init func(*Config) (Logger, error)) {
 	})
 
 	lines := strings.Split(strings.TrimSpace(stderr), "\n")
-	assert.Len(t, lines, 3)
+	require.Len(t, lines, 3)
 
-	var (
-		data1 = LogFields{}
-		data2 = LogFields{}
-		data3 = LogFields{}
-	)
-
-	assert.Nil(t, json.Unmarshal([]byte(lines[0]), &data1))
-	assert.Nil(t, json.Unmarshal([]byte(lines[1]), &data2))
-	assert.Nil(t, json.Unmarshal([]byte(lines[2]), &data3))
+	data1 := LogFields{}
+	data2 := LogFields{}
+	data3 := LogFields{}
+	require.Nil(t, json.Unmarshal([]byte(lines[0]), &data1))
+	require.Nil(t, json.Unmarshal([]byte(lines[1]), &data2))
+	require.Nil(t, json.Unmarshal([]byte(lines[2]), &data3))
 
 	// Note: this value refers to the line number containing `logger.Info("X")` in
 	// the function literal above. If code is added before that line, this value
 	// must be updated.
-	start := 42
+	start := 43
 
 	assert.Equal(t, fmt.Sprintf("log/caller_test.go:%d", start+0), data1["caller"])
 	assert.Equal(t, fmt.Sprintf("log/caller_test.go:%d", start+1), data2["caller"])
@@ -71,7 +69,7 @@ func testBasic(t *testing.T, init func(*Config) (Logger, error)) {
 func testReplay(t *testing.T, init func(*Config) (Logger, error)) {
 	stderr := captureStderr(func() {
 		logger, err := init(&Config{LogLevel: "info", LogEncoding: "json"})
-		assert.Nil(t, err)
+		require.Nil(t, err)
 
 		// Non-replayed messages are below log level - not emitted
 		adapter := NewReplayAdapter(logger, LevelDebug, LevelInfo)
@@ -83,22 +81,19 @@ func testReplay(t *testing.T, init func(*Config) (Logger, error)) {
 	})
 
 	lines := strings.Split(strings.TrimSpace(stderr), "\n")
-	assert.Len(t, lines, 4)
+	require.Len(t, lines, 4)
 
-	var (
-		data1 = LogFields{}
-		data2 = LogFields{}
-		data3 = LogFields{}
-	)
-
-	assert.Nil(t, json.Unmarshal([]byte(lines[1]), &data1))
-	assert.Nil(t, json.Unmarshal([]byte(lines[2]), &data2))
-	assert.Nil(t, json.Unmarshal([]byte(lines[3]), &data3))
+	data1 := LogFields{}
+	data2 := LogFields{}
+	data3 := LogFields{}
+	require.Nil(t, json.Unmarshal([]byte(lines[1]), &data1))
+	require.Nil(t, json.Unmarshal([]byte(lines[2]), &data2))
+	require.Nil(t, json.Unmarshal([]byte(lines[3]), &data3))
 
 	// Note: this value refers to the line number containing `logger.Info("X")` in
 	// the function literal above. If code is added before that line, this value
 	// must be updated.
-	start := 78
+	start := 76
 
 	assert.Equal(t, fmt.Sprintf("log/caller_test.go:%d", start+0), data1["caller"])
 	assert.Equal(t, fmt.Sprintf("log/caller_test.go:%d", start+1), data2["caller"])
@@ -108,7 +103,7 @@ func testReplay(t *testing.T, init func(*Config) (Logger, error)) {
 func testRollup(t *testing.T, init func(*Config) (Logger, error)) {
 	stderr := captureStderr(func() {
 		logger, err := init(&Config{LogLevel: "info", LogEncoding: "json"})
-		assert.Nil(t, err)
+		require.Nil(t, err)
 
 		clock := glock.NewMockClock()
 		adapter := adaptShim(newRollupShim(logger, clock, time.Second))
@@ -122,20 +117,17 @@ func testRollup(t *testing.T, init func(*Config) (Logger, error)) {
 	})
 
 	lines := strings.Split(strings.TrimSpace(stderr), "\n")
-	assert.Len(t, lines, 2)
+	require.Len(t, lines, 2)
 
-	var (
-		data1 = LogFields{}
-		data2 = LogFields{}
-	)
-
-	assert.Nil(t, json.Unmarshal([]byte(lines[0]), &data1))
-	assert.Nil(t, json.Unmarshal([]byte(lines[1]), &data2))
+	data1 := LogFields{}
+	data2 := LogFields{}
+	require.Nil(t, json.Unmarshal([]byte(lines[0]), &data1))
+	require.Nil(t, json.Unmarshal([]byte(lines[1]), &data2))
 
 	// Note: this value refers to the line number containing the first instance
 	// of `logger.Info("A")` in the function literal above. If code is added
 	// before that line, this value must be updated.
-	start := 115
+	start := 110
 
 	assert.Equal(t, fmt.Sprintf("log/caller_test.go:%d", start), data1["caller"])
 	assert.Equal(t, fmt.Sprintf("log/caller_test.go:%d", start), data2["caller"])
@@ -144,7 +136,7 @@ func testRollup(t *testing.T, init func(*Config) (Logger, error)) {
 func testAdapter(t *testing.T, init func(*Config) (Logger, error)) {
 	stderr := captureStderr(func() {
 		logger, err := init(&Config{LogLevel: "info", LogEncoding: "json"})
-		assert.Nil(t, err)
+		require.Nil(t, err)
 		// Push caller stack out once for each indirection
 		indirectLogger := logger.WithIndirectCaller(3)
 
@@ -159,22 +151,19 @@ func testAdapter(t *testing.T, init func(*Config) (Logger, error)) {
 	})
 
 	lines := strings.Split(strings.TrimSpace(stderr), "\n")
-	assert.Len(t, lines, 3)
+	require.Len(t, lines, 3)
 
-	var (
-		data1 = LogFields{}
-		data2 = LogFields{}
-		data3 = LogFields{}
-	)
-
-	assert.Nil(t, json.Unmarshal([]byte(lines[0]), &data1))
-	assert.Nil(t, json.Unmarshal([]byte(lines[1]), &data2))
-	assert.Nil(t, json.Unmarshal([]byte(lines[2]), &data3))
+	data1 := LogFields{}
+	data2 := LogFields{}
+	data3 := LogFields{}
+	require.Nil(t, json.Unmarshal([]byte(lines[0]), &data1))
+	require.Nil(t, json.Unmarshal([]byte(lines[1]), &data2))
+	require.Nil(t, json.Unmarshal([]byte(lines[2]), &data3))
 
 	// Note: this value refers to the line number containing `logger.Info("X")` in
 	// the function literal above. If code is added before that line, this value
 	// must be updated.
-	start := 155
+	start := 147
 
 	assert.Equal(t, fmt.Sprintf("log/caller_test.go:%d", start+0), data1["caller"])
 	assert.Equal(t, fmt.Sprintf("log/caller_test.go:%d", start+1), data2["caller"])
