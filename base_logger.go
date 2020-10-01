@@ -6,7 +6,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/efritz/glock"
+	"github.com/derision-test/glock"
 )
 
 type baseLogger interface {

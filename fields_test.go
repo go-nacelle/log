@@ -1,38 +1,39 @@
 package log
 
 import (
+	"testing"
 	"time"
 
-	"github.com/aphistic/sweet"
-	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/assert"
 )
 
-type FieldsSuite struct{}
-
-func (s *FieldsSuite) TestNormalizeTimeValues(t sweet.T) {
-	var (
-		t1     = time.Unix(1503939881, 0)
-		t2     = time.Unix(1503939891, 0)
-		fields = LogFields{
-			"foo":  "bar",
-			"bar":  t1,
-			"baz":  t2,
-			"bonk": []bool{true, false, true},
-		}
-	)
+func TestFieldsNormalizeTimeValues(t *testing.T) {
+	t1 := time.Unix(1503939881, 0)
+	t2 := time.Unix(1503939891, 0)
+	fields := LogFields{
+		"foo":  "bar",
+		"bar":  t1,
+		"baz":  t2,
+		"bonk": []bool{true, false, true},
+	}
 
 	// Modifies object in-place
-	Expect(fields.normalizeTimeValues()).To(Equal(fields))
+	assert.Equal(t, fields, fields.normalizeTimeValues())
 
 	// Non-time values remain the same
-	Expect(fields["foo"]).To(Equal("bar"))
-	Expect(fields["bonk"]).To(Equal([]bool{true, false, true}))
+	assert.Equal(t, "bar", fields["foo"])
+	assert.Equal(t, []bool{true, false, true}, fields["bonk"])
+
+	assertTime := func(value interface{}, expected interface{}) {
+		actual, _ := time.Parse(JSONTimeFormat, value.(string))
+		assert.Equal(t, expected, actual)
+	}
 
 	// Times converted to ISO 8601
-	Expect(time.Parse(JSONTimeFormat, fields["bar"].(string))).To(Equal(t1))
-	Expect(time.Parse(JSONTimeFormat, fields["baz"].(string))).To(Equal(t2))
+	assertTime(fields["bar"], t1)
+	assertTime(fields["baz"], t2)
 }
 
-func (s *FieldsSuite) TestNormalizeTimeValuesOnNilFields(t sweet.T) {
-	Expect(LogFields(nil).normalizeTimeValues()).To(BeNil())
+func TestFieldsNormalizeTimeValuesOnNilFields(t *testing.T) {
+	assert.Nil(t, LogFields(nil).normalizeTimeValues())
 }

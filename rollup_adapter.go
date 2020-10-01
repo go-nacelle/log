@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/efritz/glock"
+	"github.com/derision-test/glock"
 )
 
 // FieldRollup is a field assigned to the last message in a

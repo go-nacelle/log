@@ -6,32 +6,7 @@ import (
 	"io"
 	"os"
 	"sync"
-	"testing"
-
-	"github.com/aphistic/sweet"
-	junit "github.com/aphistic/sweet-junit"
-	. "github.com/onsi/gomega"
 )
-
-func TestMain(m *testing.M) {
-	RegisterFailHandler(sweet.GomegaFail)
-
-	sweet.Run(m, func(s *sweet.S) {
-		s.RegisterPlugin(junit.NewPlugin())
-
-		s.AddSuite(&BaseLoggerSuite{})
-		s.AddSuite(&CallerSuite{})
-		s.AddSuite(&ConfigSuite{})
-		s.AddSuite(&ConsoleLoggerSuite{})
-		s.AddSuite(&FieldsSuite{})
-		s.AddSuite(&JSONLoggerSuite{})
-		s.AddSuite(&ReplaySuite{})
-		s.AddSuite(&RollupSuite{})
-	})
-}
-
-//
-// Mocks
 
 type testShim struct {
 	messages []*logMessage
@@ -85,10 +60,8 @@ func captureStderr(f func()) string {
 func read(reader io.Reader, ch chan<- string) {
 	defer close(ch)
 
-	var (
-		buffer  = bytes.Buffer{}
-		scanner = bufio.NewScanner(reader)
-	)
+	buffer := bytes.Buffer{}
+	scanner := bufio.NewScanner(reader)
 
 	for scanner.Scan() {
 		line := scanner.Text()

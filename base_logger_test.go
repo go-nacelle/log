@@ -1,23 +1,22 @@
 package log
 
-//go:generate go-mockgen -f github.com/go-nacelle/log -i baseLogger -o base_logger_mock_test.go
-
 import (
-	"github.com/aphistic/sweet"
-	"github.com/efritz/glock"
-	. "github.com/efritz/go-mockgen/matchers"
-	. "github.com/onsi/gomega"
+	"testing"
+
+	"github.com/derision-test/glock"
+	mockassert "github.com/derision-test/go-mockgen/testutil/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 type BaseLoggerSuite struct{}
 
-func (s *BaseLoggerSuite) TestLogFormat(t sweet.T) {
+func (s *BaseLoggerSuite) TestLogFormat(t *testing.T) {
 	base := NewMockBaseLogger()
 	clock := glock.NewMockClock()
 	logger := newTestShim(base, LevelDebug, nil, clock, func() {})
 	logger.LogWithFields(LevelInfo, nil, "test %d %d %d", 1, 2, 3)
 
-	Expect(base.LogFunc).To(BeCalledOnceWith(
+	mockassert.CalledOnceWith(t, base.LogFunc, mockassert.Values(
 		clock.Now().UTC(),
 		LevelInfo,
 		LogFields{
@@ -31,7 +30,7 @@ func (s *BaseLoggerSuite) TestLogFormat(t sweet.T) {
 	))
 }
 
-func (s *BaseLoggerSuite) TestWrappedLoggers(t sweet.T) {
+func (s *BaseLoggerSuite) TestWrappedLoggers(t *testing.T) {
 	base := NewMockBaseLogger()
 	clock := glock.NewMockClock()
 	logger := newTestShim(base, LevelDebug, LogFields{"init": "foo"}, clock, func() {})
@@ -39,7 +38,7 @@ func (s *BaseLoggerSuite) TestWrappedLoggers(t sweet.T) {
 	wrappedLogger.LogWithFields(LevelDebug, LogFields{"extra": "baz"}, "test %d %d %d", 1, 2, 3)
 	logger.LogWithFields(LevelDebug, LogFields{"extra": "bonk"}, "test %d %d %d", 1, 2, 3)
 
-	Expect(base.LogFunc).To(BeCalledOnceWith(
+	mockassert.CalledOnceWith(t, base.LogFunc, mockassert.Values(
 		clock.Now().UTC(),
 		LevelDebug,
 		LogFields{
@@ -55,7 +54,7 @@ func (s *BaseLoggerSuite) TestWrappedLoggers(t sweet.T) {
 		"test 1 2 3",
 	))
 
-	Expect(base.LogFunc).To(BeCalledOnceWith(
+	mockassert.CalledOnceWith(t, base.LogFunc, mockassert.Values(
 		clock.Now().UTC(),
 		LevelDebug,
 		LogFields{
@@ -71,19 +70,19 @@ func (s *BaseLoggerSuite) TestWrappedLoggers(t sweet.T) {
 	))
 }
 
-func (s *BaseLoggerSuite) TestLogLevelFilter(t sweet.T) {
+func (s *BaseLoggerSuite) TestLogLevelFilter(t *testing.T) {
 	base := NewMockBaseLogger()
 	clock := glock.NewMockClock()
 	logger := newTestShim(base, LevelInfo, nil, clock, func() {})
 	logger.LogWithFields(LevelDebug, nil, "test %d %d %d", 1, 2, 3)
-	Expect(base.LogFunc).NotTo(BeCalled())
+	mockassert.NotCalled(t, base.LogFunc)
 }
 
-func (s *BaseLoggerSuite) TestLogFatal(t sweet.T) {
+func (s *BaseLoggerSuite) TestLogFatal(t *testing.T) {
 	base := NewMockBaseLogger()
 	clock := glock.NewMockClock()
 	called := false
 	logger := newTestShim(base, LevelInfo, nil, clock, func() { called = true })
 	logger.LogWithFields(LevelFatal, nil, "test %d %d %d", 1, 2, 3)
-	Expect(called).To(BeTrue())
+	assert.True(t, called)
 }

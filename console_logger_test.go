@@ -2,25 +2,22 @@ package log
 
 import (
 	"bytes"
+	"testing"
 	"text/template"
 	"time"
 
-	"github.com/aphistic/sweet"
-	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-type ConsoleLoggerSuite struct{}
-
-func (s *ConsoleLoggerSuite) TestLevel(t sweet.T) {
+func TestConsoleLoggerrLevel(t *testing.T) {
 	parsed, err := template.New("test").Parse("test: {{.message}}")
-	Expect(err).To(BeNil())
+	require.Nil(t, err)
 
-	var (
-		templates = map[LogLevel]*template.Template{LevelInfo: parsed}
-		logger    = newConsoleLogger(templates, true)
-		buffer    = bytes.NewBuffer(nil)
-		timestamp = time.Unix(1503939881, 0)
-	)
+	templates := map[LogLevel]*template.Template{LevelInfo: parsed}
+	logger := newConsoleLogger(templates, true)
+	buffer := bytes.NewBuffer(nil)
+	timestamp := time.Unix(1503939881, 0)
 
 	logger.stream = buffer
 
@@ -31,19 +28,17 @@ func (s *ConsoleLoggerSuite) TestLevel(t sweet.T) {
 		"test 1234",
 	)
 
-	Expect(string(buffer.Bytes())).To(Equal("test: test 1234\n"))
+	assert.Equal(t, "test: test 1234\n", string(buffer.Bytes()))
 }
 
-func (s *ConsoleLoggerSuite) TestColorDisabled(t sweet.T) {
+func TestConsoleLoggerColorDisabled(t *testing.T) {
 	parsed, err := template.New("test").Parse("test: {{.message}}")
-	Expect(err).To(BeNil())
+	require.Nil(t, err)
 
-	var (
-		templates = map[LogLevel]*template.Template{LevelNone: parsed}
-		logger    = newConsoleLogger(templates, false)
-		buffer    = bytes.NewBuffer(nil)
-		timestamp = time.Unix(1503939881, 0)
-	)
+	templates := map[LogLevel]*template.Template{LevelNone: parsed}
+	logger := newConsoleLogger(templates, false)
+	buffer := bytes.NewBuffer(nil)
+	timestamp := time.Unix(1503939881, 0)
 
 	logger.stream = buffer
 
@@ -54,5 +49,5 @@ func (s *ConsoleLoggerSuite) TestColorDisabled(t sweet.T) {
 		"test 1234",
 	)
 
-	Expect(string(buffer.Bytes())).To(Equal("test: test 1234\n"))
+	assert.Equal(t, "test: test 1234\n", string(buffer.Bytes()))
 }

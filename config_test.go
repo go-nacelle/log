@@ -1,26 +1,25 @@
 package log
 
 import (
-	"github.com/aphistic/sweet"
-	. "github.com/onsi/gomega"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-type ConfigSuite struct{}
-
-func (s *ConfigSuite) TestIsLegalLevel(t sweet.T) {
-	Expect(isLegalLevel("debug")).To(BeTrue())
-	Expect(isLegalLevel("info")).To(BeTrue())
-	Expect(isLegalLevel("warning")).To(BeTrue())
-	Expect(isLegalLevel("error")).To(BeTrue())
-	Expect(isLegalLevel("fatal")).To(BeTrue())
-	Expect(isLegalLevel("warn")).To(BeFalse())
-	Expect(isLegalLevel("trace")).To(BeFalse())
-	Expect(isLegalLevel("die")).To(BeFalse())
+func TestIsLegalLevel(t *testing.T) {
+	assert.True(t, isLegalLevel("debug"))
+	assert.True(t, isLegalLevel("info"))
+	assert.True(t, isLegalLevel("warning"))
+	assert.True(t, isLegalLevel("error"))
+	assert.True(t, isLegalLevel("fatal"))
+	assert.False(t, isLegalLevel("warn"))
+	assert.False(t, isLegalLevel("trace"))
+	assert.False(t, isLegalLevel("die"))
 }
 
-func (s *ConfigSuite) TestIsLegalEncoding(t sweet.T) {
-	Expect(isLegalEncoding("json")).To(BeTrue())
-	Expect(isLegalEncoding("console")).To(BeTrue())
-	Expect(isLegalEncoding("file")).To(BeFalse())
-	Expect(isLegalEncoding("yaml")).To(BeFalse())
+func TestIsLegalEncoding(t *testing.T) {
+	assert.True(t, isLegalEncoding("json"))
+	assert.True(t, isLegalEncoding("console"))
+	assert.False(t, isLegalEncoding("file"))
+	assert.False(t, isLegalEncoding("yaml"))
 }
