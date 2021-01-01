@@ -9,27 +9,24 @@ import (
 	"github.com/derision-test/glock"
 )
 
-type baseLogger interface {
+type _baseLoggerTODO interface {
 	Log(timestamp time.Time, level LogLevel, fields LogFields, msg string) error
 }
 
 type baseWrapper struct {
-	logger   baseLogger
+	logger   _baseLoggerTODO
 	level    LogLevel
 	clock    glock.Clock
 	exiter   func()
 	sequence uint64
 }
 
-type baseShim struct {
+type baseLogger struct {
 	wrapper *baseWrapper
 	fields  LogFields
 }
 
-//
-// Shim
-
-func newBaseShim(logger baseLogger, level LogLevel, initialFields LogFields) Logger {
+func newBaseLogger(logger _baseLoggerTODO, level LogLevel, initialFields LogFields) Logger {
 	wrapper := &baseWrapper{
 		logger,
 		level,
@@ -38,10 +35,10 @@ func newBaseShim(logger baseLogger, level LogLevel, initialFields LogFields) Log
 		0,
 	}
 
-	return adaptShim(&baseShim{wrapper, initialFields})
+	return FromMinimalLogger(&baseLogger{wrapper, initialFields})
 }
 
-func newTestShim(logger baseLogger, level LogLevel, initialFields LogFields, clock glock.Clock, exiter func()) Logger {
+func newTestLogger(logger _baseLoggerTODO, level LogLevel, initialFields LogFields, clock glock.Clock, exiter func()) Logger {
 	wrapper := &baseWrapper{
 		logger,
 		level,
@@ -50,18 +47,18 @@ func newTestShim(logger baseLogger, level LogLevel, initialFields LogFields, clo
 		0,
 	}
 
-	return adaptShim(&baseShim{wrapper, initialFields})
+	return FromMinimalLogger(&baseLogger{wrapper, initialFields})
 }
 
-func (s *baseShim) WithFields(fields LogFields) logShim {
+func (s *baseLogger) WithFields(fields LogFields) MinimalLogger {
 	if len(fields) == 0 {
 		return s
 	}
 
-	return &baseShim{s.wrapper, s.fields.concat(fields)}
+	return &baseLogger{s.wrapper, s.fields.concat(fields)}
 }
 
-func (s *baseShim) LogWithFields(level LogLevel, fields LogFields, format string, args ...interface{}) {
+func (s *baseLogger) LogWithFields(level LogLevel, fields LogFields, format string, args ...interface{}) {
 	if level > s.wrapper.level {
 		return
 	}
@@ -82,6 +79,6 @@ func (s *baseShim) LogWithFields(level LogLevel, fields LogFields, format string
 	}
 }
 
-func (s *baseShim) Sync() error {
+func (s *baseLogger) Sync() error {
 	return nil
 }

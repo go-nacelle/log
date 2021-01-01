@@ -13,7 +13,7 @@ import (
 const FieldRollup = "rollup-multiplicity"
 
 type (
-	rollupShim struct {
+	rollupLogger struct {
 		logger         Logger
 		clock          glock.Clock
 		windowDuration time.Duration
@@ -29,22 +29,19 @@ type (
 	}
 )
 
-//
-// Shim
+var _ MinimalLogger = &rollupLogger{}
 
-var _ logShim = &rollupShim{}
-
-// NewRollupAdapter returns a logger with functionality to throttle similar messages.
+// NewRollupLogger returns a logger with functionality to throttle similar messages.
 // Messages begin a roll-up when a second messages with an identical format string is
 // seen in the same window period. All remaining messages logged within that period
 // are captured and emitted as a single message at the end of the window period. The
 // fields and args are equal to the first rolled-up message.
-func NewRollupAdapter(logger Logger, windowDuration time.Duration) Logger {
-	return adaptShim(newRollupShim(logger, glock.NewRealClock(), windowDuration))
+func NewRollupLogger(logger Logger, windowDuration time.Duration) Logger {
+	return FromMinimalLogger(newRollupLogger(logger, glock.NewRealClock(), windowDuration))
 }
 
-func newRollupShim(logger Logger, clock glock.Clock, windowDuration time.Duration) *rollupShim {
-	return &rollupShim{
+func newRollupLogger(logger Logger, clock glock.Clock, windowDuration time.Duration) *rollupLogger {
+	return &rollupLogger{
 		logger:         logger,
 		clock:          clock,
 		windowDuration: windowDuration,
@@ -52,26 +49,26 @@ func newRollupShim(logger Logger, clock glock.Clock, windowDuration time.Duratio
 	}
 }
 
-func (s *rollupShim) WithFields(fields LogFields) logShim {
+func (s *rollupLogger) WithFields(fields LogFields) MinimalLogger {
 	if len(fields) == 0 {
 		return s
 	}
 
-	return newRollupShim(
+	return newRollupLogger(
 		s.logger.WithFields(fields),
 		s.clock,
 		s.windowDuration,
 	)
 }
 
-func (s *rollupShim) LogWithFields(level LogLevel, fields LogFields, format string, args ...interface{}) {
+func (s *rollupLogger) LogWithFields(level LogLevel, fields LogFields, format string, args ...interface{}) {
 	if s.getWindow(format).record(s.logger, s.clock, s.windowDuration, level, fields, format, args...) {
 		// Not rolling up, log immediately
 		s.logger.LogWithFields(level, fields, format, args...)
 	}
 }
 
-func (s *rollupShim) getWindow(format string) *logWindow {
+func (s *rollupLogger) getWindow(format string) *logWindow {
 	s.mutex.RLock()
 	if window, ok := s.windows[format]; ok {
 		s.mutex.RUnlock()
@@ -91,7 +88,7 @@ func (s *rollupShim) getWindow(format string) *logWindow {
 	return window
 }
 
-func (s *rollupShim) Sync() error {
+func (s *rollupLogger) Sync() error {
 	for _, window := range s.windows {
 		window.flush(s.logger)
 	}

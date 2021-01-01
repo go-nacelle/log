@@ -13,7 +13,7 @@ type BaseLoggerSuite struct{}
 func (s *BaseLoggerSuite) TestLogFormat(t *testing.T) {
 	base := NewMockBaseLogger()
 	clock := glock.NewMockClock()
-	logger := newTestShim(base, LevelDebug, nil, clock, func() {})
+	logger := newTestLogger(base, LevelDebug, nil, clock, func() {})
 	logger.LogWithFields(LevelInfo, nil, "test %d %d %d", 1, 2, 3)
 
 	mockassert.CalledOnceWith(t, base.LogFunc, mockassert.Values(
@@ -33,7 +33,7 @@ func (s *BaseLoggerSuite) TestLogFormat(t *testing.T) {
 func (s *BaseLoggerSuite) TestWrappedLoggers(t *testing.T) {
 	base := NewMockBaseLogger()
 	clock := glock.NewMockClock()
-	logger := newTestShim(base, LevelDebug, LogFields{"init": "foo"}, clock, func() {})
+	logger := newTestLogger(base, LevelDebug, LogFields{"init": "foo"}, clock, func() {})
 	wrappedLogger := logger.WithFields(LogFields{"wrapped": "bar"})
 	wrappedLogger.LogWithFields(LevelDebug, LogFields{"extra": "baz"}, "test %d %d %d", 1, 2, 3)
 	logger.LogWithFields(LevelDebug, LogFields{"extra": "bonk"}, "test %d %d %d", 1, 2, 3)
@@ -73,7 +73,7 @@ func (s *BaseLoggerSuite) TestWrappedLoggers(t *testing.T) {
 func (s *BaseLoggerSuite) TestLogLevelFilter(t *testing.T) {
 	base := NewMockBaseLogger()
 	clock := glock.NewMockClock()
-	logger := newTestShim(base, LevelInfo, nil, clock, func() {})
+	logger := newTestLogger(base, LevelInfo, nil, clock, func() {})
 	logger.LogWithFields(LevelDebug, nil, "test %d %d %d", 1, 2, 3)
 	mockassert.NotCalled(t, base.LogFunc)
 }
@@ -82,7 +82,7 @@ func (s *BaseLoggerSuite) TestLogFatal(t *testing.T) {
 	base := NewMockBaseLogger()
 	clock := glock.NewMockClock()
 	called := false
-	logger := newTestShim(base, LevelInfo, nil, clock, func() { called = true })
+	logger := newTestLogger(base, LevelInfo, nil, clock, func() { called = true })
 	logger.LogWithFields(LevelFatal, nil, "test %d %d %d", 1, 2, 3)
 	assert.True(t, called)
 }

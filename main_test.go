@@ -8,16 +8,16 @@ import (
 	"sync"
 )
 
-type testShim struct {
+type testLogger struct {
 	messages []*logMessage
 	mutex    sync.RWMutex
 }
 
-func (ts *testShim) WithFields(fields LogFields) logShim {
+func (ts *testLogger) WithFields(fields LogFields) MinimalLogger {
 	return ts
 }
 
-func (ts *testShim) copy() []*logMessage {
+func (ts *testLogger) copy() []*logMessage {
 	ts.mutex.RLock()
 	defer ts.mutex.RUnlock()
 
@@ -26,7 +26,7 @@ func (ts *testShim) copy() []*logMessage {
 	return messages
 }
 
-func (ts *testShim) LogWithFields(level LogLevel, fields LogFields, format string, args ...interface{}) {
+func (ts *testLogger) LogWithFields(level LogLevel, fields LogFields, format string, args ...interface{}) {
 	ts.mutex.Lock()
 	defer ts.mutex.Unlock()
 
@@ -38,7 +38,7 @@ func (ts *testShim) LogWithFields(level LogLevel, fields LogFields, format strin
 	})
 }
 
-func (ts *testShim) Sync() error {
+func (ts *testLogger) Sync() error {
 	return nil
 }
 
