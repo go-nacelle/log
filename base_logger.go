@@ -9,12 +9,12 @@ import (
 	"github.com/derision-test/glock"
 )
 
-type _baseLoggerTODO interface {
+type minimalLogger interface {
 	Log(timestamp time.Time, level LogLevel, fields LogFields, msg string) error
 }
 
 type baseWrapper struct {
-	logger   _baseLoggerTODO
+	logger   minimalLogger
 	level    LogLevel
 	clock    glock.Clock
 	exiter   func()
@@ -26,7 +26,7 @@ type baseLogger struct {
 	fields  LogFields
 }
 
-func newBaseLogger(logger _baseLoggerTODO, level LogLevel, initialFields LogFields) Logger {
+func newBaseLogger(logger minimalLogger, level LogLevel, initialFields LogFields) Logger {
 	wrapper := &baseWrapper{
 		logger,
 		level,
@@ -38,7 +38,7 @@ func newBaseLogger(logger _baseLoggerTODO, level LogLevel, initialFields LogFiel
 	return FromMinimalLogger(&baseLogger{wrapper, initialFields})
 }
 
-func newTestLogger(logger _baseLoggerTODO, level LogLevel, initialFields LogFields, clock glock.Clock, exiter func()) Logger {
+func newTestLogger(logger minimalLogger, level LogLevel, initialFields LogFields, clock glock.Clock, exiter func()) Logger {
 	wrapper := &baseWrapper{
 		logger,
 		level,
