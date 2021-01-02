@@ -14,10 +14,10 @@ func InitLogger(c *Config) (Logger, error) {
 		return nil, err
 	}
 
-	return newBaseShim(baseLogger, parseLogLevel(c.LogLevel), c.LogInitialFields), nil
+	return newBaseLogger(baseLogger, parseLogLevel(c.LogLevel), c.LogInitialFields), nil
 }
 
-func initBaseLogger(c *Config) (baseLogger, error) {
+func initBaseLogger(c *Config) (minimalLogger, error) {
 	if c.LogEncoding == "json" {
 		return newJSONLogger(c.LogJSONFieldNames), nil
 	}

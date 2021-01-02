@@ -12,13 +12,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCallerLogger(t *testing.T)                  { testBasic(t, InitLogger) }
-func TestCallerAdapter(t *testing.T)                 { testAdapter(t, InitLogger) }
-func TestCallerLoggerWithFields(t *testing.T)        { testFields(t, InitLogger) }
-func TestCallerLoggerWithReplayAdapter(t *testing.T) { testReplayAdapter(t, InitLogger) }
-func TestCallerLoggerWithRollupAdapter(t *testing.T) { testRollupAdapter(t, InitLogger) }
-func TestCallerLoggerReplay(t *testing.T)            { testReplay(t, InitLogger) }
-func TestCallerLoggerRollup(t *testing.T)            { testRollup(t, InitLogger) }
+func TestCallerLogger(t *testing.T)                 { testBasic(t, InitLogger) }
+func TestCallerLoggerWithFields(t *testing.T)       { testFields(t, InitLogger) }
+func TestCallerLoggerWithReplayLogger(t *testing.T) { testReplayLogger(t, InitLogger) }
+func TestCallerLoggerWithRollupLogger(t *testing.T) { testRollupLogger(t, InitLogger) }
+func TestCallerLoggerReplay(t *testing.T)           { testReplay(t, InitLogger) }
+func TestCallerLoggerRollup(t *testing.T)           { testRollup(t, InitLogger) }
+func TestCallerIndirect(t *testing.T)               { testIndirect(t, InitLogger) }
 
 func TestCallerTrimPath(t *testing.T) {
 	assert.Equal(t, "", trimPath(""))
@@ -72,12 +72,12 @@ func testReplay(t *testing.T, init func(*Config) (Logger, error)) {
 		require.Nil(t, err)
 
 		// Non-replayed messages are below log level - not emitted
-		adapter := NewReplayAdapter(logger, LevelDebug, LevelInfo)
-		adapter.Debug("X")
-		adapter.InfoWithFields(LogFields{"empty": false}, "Y")
-		adapter.Debug("Z")
-		adapter.Replay(LevelWarning)
-		adapter.Sync()
+		replayLogger := NewReplayLogger(logger, LevelDebug, LevelInfo)
+		replayLogger.Debug("X")
+		replayLogger.InfoWithFields(LogFields{"empty": false}, "Y")
+		replayLogger.Debug("Z")
+		replayLogger.Replay(LevelWarning)
+		replayLogger.Sync()
 	})
 
 	lines := strings.Split(strings.TrimSpace(stderr), "\n")
@@ -106,14 +106,14 @@ func testRollup(t *testing.T, init func(*Config) (Logger, error)) {
 		require.Nil(t, err)
 
 		clock := glock.NewMockClock()
-		adapter := adaptShim(newRollupShim(logger, clock, time.Second))
-		adapter.Info("A")
-		adapter.Info("A")
-		adapter.Info("A")
-		adapter.Info("A")
-		adapter.Info("A")
+		rollupLogger := FromMinimalLogger(newRollupLogger(logger, clock, time.Second))
+		rollupLogger.Info("A")
+		rollupLogger.Info("A")
+		rollupLogger.Info("A")
+		rollupLogger.Info("A")
+		rollupLogger.Info("A")
 		clock.BlockingAdvance(time.Second)
-		adapter.Sync()
+		rollupLogger.Sync()
 	})
 
 	lines := strings.Split(strings.TrimSpace(stderr), "\n")
@@ -133,7 +133,7 @@ func testRollup(t *testing.T, init func(*Config) (Logger, error)) {
 	assert.Equal(t, fmt.Sprintf("log/caller_test.go:%d", start), data2["caller"])
 }
 
-func testAdapter(t *testing.T, init func(*Config) (Logger, error)) {
+func testIndirect(t *testing.T, init func(*Config) (Logger, error)) {
 	stderr := captureStderr(func() {
 		logger, err := init(&Config{LogLevel: "info", LogEncoding: "json"})
 		require.Nil(t, err)
@@ -181,24 +181,24 @@ func testFields(t *testing.T, init func(*Config) (Logger, error)) {
 	})
 }
 
-func testReplayAdapter(t *testing.T, init func(*Config) (Logger, error)) {
+func testReplayLogger(t *testing.T, init func(*Config) (Logger, error)) {
 	testBasic(t, func(config *Config) (Logger, error) {
 		logger, err := init(config)
 		if err != nil {
 			return nil, err
 		}
 
-		return NewReplayAdapter(NewReplayAdapter(NewReplayAdapter(logger))), nil
+		return NewReplayLogger(NewReplayLogger(NewReplayLogger(logger))), nil
 	})
 }
 
-func testRollupAdapter(t *testing.T, init func(*Config) (Logger, error)) {
+func testRollupLogger(t *testing.T, init func(*Config) (Logger, error)) {
 	testBasic(t, func(config *Config) (Logger, error) {
 		logger, err := init(config)
 		if err != nil {
 			return nil, err
 		}
 
-		return NewRollupAdapter(NewRollupAdapter(NewRollupAdapter(logger, time.Second), time.Second), time.Second), nil
+		return NewRollupLogger(NewRollupLogger(NewRollupLogger(logger, time.Second), time.Second), time.Second), nil
 	})
 }

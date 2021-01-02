@@ -1,18 +1,18 @@
 package log
 
-type NilShim struct{}
+type NilLogger struct{}
 
 func NewNilLogger() Logger {
-	return adaptShim(&NilShim{})
+	return FromMinimalLogger(&NilLogger{})
 }
 
-func (n *NilShim) WithFields(LogFields) logShim {
+func (n *NilLogger) WithFields(LogFields) MinimalLogger {
 	return n
 }
 
-func (n *NilShim) LogWithFields(LogLevel, LogFields, string, ...interface{}) {
+func (n *NilLogger) LogWithFields(LogLevel, LogFields, string, ...interface{}) {
 }
 
-func (n *NilShim) Sync() error {
+func (n *NilLogger) Sync() error {
 	return nil
 }

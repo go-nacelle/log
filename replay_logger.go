@@ -23,9 +23,14 @@ type (
 		Replay(LogLevel)
 	}
 
-	replayShim struct {
+	replayLogger struct {
 		logger        Logger
 		sharedJournal *sharedJournal
+	}
+
+	replayLoggerAdapter struct {
+		Logger
+		replayLogger *replayLogger
 	}
 
 	sharedJournal struct {
@@ -42,41 +47,42 @@ type (
 	}
 )
 
-//
-// Shim
+var _ MinimalLogger = &replayLogger{}
 
-var _ logShim = &replayShim{}
-
-// NewReplayAdapter creates a ReplayLogger wrapping the given logger.
-func NewReplayAdapter(logger Logger, levels ...LogLevel) ReplayLogger {
-	return adaptReplayShim(newReplayShim(logger, glock.NewRealClock(), levels...))
+// NewReplayLogger creates a ReplayLogger wrapping the given logger.
+func NewReplayLogger(logger Logger, levels ...LogLevel) ReplayLogger {
+	return fromReplayLogger(newReplayLogger(logger, glock.NewRealClock(), levels...))
 }
 
-func newReplayShim(logger Logger, clock glock.Clock, levels ...LogLevel) *replayShim {
+func fromReplayLogger(logger *replayLogger) ReplayLogger {
+	return &replayLoggerAdapter{FromMinimalLogger(logger), logger}
+}
+
+func newReplayLogger(logger Logger, clock glock.Clock, levels ...LogLevel) *replayLogger {
 	sharedJournal := &sharedJournal{
 		clock:    clock,
 		messages: []*journaledMessage{},
 		levels:   levels,
 	}
 
-	return &replayShim{
+	return &replayLogger{
 		logger:        logger,
 		sharedJournal: sharedJournal,
 	}
 }
 
-func (s *replayShim) WithFields(fields LogFields) logShim {
+func (s *replayLogger) WithFields(fields LogFields) MinimalLogger {
 	if len(fields) == 0 {
 		return s
 	}
 
-	return &replayShim{
+	return &replayLogger{
 		logger:        s.logger.WithFields(fields),
 		sharedJournal: s.sharedJournal,
 	}
 }
 
-func (s *replayShim) LogWithFields(level LogLevel, fields LogFields, format string, args ...interface{}) {
+func (s *replayLogger) LogWithFields(level LogLevel, fields LogFields, format string, args ...interface{}) {
 	// Log immediately
 	s.logger.LogWithFields(level, fields, format, args...)
 
@@ -84,11 +90,11 @@ func (s *replayShim) LogWithFields(level LogLevel, fields LogFields, format stri
 	s.sharedJournal.record(s.logger, level, fields, format, args)
 }
 
-func (s *replayShim) Sync() error {
+func (s *replayLogger) Sync() error {
 	return s.logger.Sync()
 }
 
-func (s *replayShim) Replay(level LogLevel) {
+func (s *replayLogger) Replay(level LogLevel) {
 	s.sharedJournal.replay(level)
 }
 
@@ -166,4 +172,11 @@ func (m *journaledMessage) replay(level *LogLevel) {
 		m.message.format,
 		m.message.args...,
 	)
+}
+
+//
+// Adapter
+
+func (a *replayLoggerAdapter) Replay(level LogLevel) {
+	a.replayLogger.Replay(level)
 }
