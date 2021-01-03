@@ -43,8 +43,8 @@ func TestBaseLoggerWrappedLoggers(t *testing.T) {
 			"init":    "foo",
 			"wrapped": "bar",
 			"extra":   "baz",
-			// Note: this value refers to the line number containing `LogWithFields` in
-			// the test setup above. If code is added before that line, this value must
+			// Note: this value refers to the line number containing the first `LogWithFields`
+			// call in the test setup above. If code is added before that line, this value must
 			// be updated.
 			"caller":         "log/base_logger_test.go:36",
 			"sequenceNumber": uint64(1),
@@ -58,8 +58,8 @@ func TestBaseLoggerWrappedLoggers(t *testing.T) {
 		LogFields{
 			"init":  "foo",
 			"extra": "bonk",
-			// Note: this value refers to the line number containing `LogWithFields` in
-			// the test setup above. If code is added before that line, this value must
+			// Note: this value refers to the line number containing the second `LogWithFields`
+			// call in the test setup above. If code is added before that line, this value must
 			// be updated.
 			"caller":         "log/base_logger_test.go:37",
 			"sequenceNumber": uint64(2),
