@@ -17,7 +17,7 @@ func InitLogger(c *Config) (Logger, error) {
 	return newBaseLogger(baseLogger, parseLogLevel(c.LogLevel), c.LogInitialFields), nil
 }
 
-func initBaseLogger(c *Config) (minimalLogger, error) {
+func initBaseLogger(c *Config) (logSink, error) {
 	if c.LogEncoding == "json" {
 		return newJSONLogger(c.LogJSONFieldNames), nil
 	}

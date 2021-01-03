@@ -7,19 +7,19 @@ import (
 	"time"
 )
 
-// MockBaseLogger is a mock implementation of the baseLogger interface (from
-// the package github.com/go-nacelle/log) used for unit testing.
-type MockBaseLogger struct {
+// MockLogSink is a mock implementation of the logSink interface (from the
+// package github.com/go-nacelle/log) used for unit testing.
+type MockLogSink struct {
 	// LogFunc is an instance of a mock function object controlling the
 	// behavior of the method Log.
-	LogFunc *BaseLoggerLogFunc
+	LogFunc *LogSinkLogFunc
 }
 
-// NewMockBaseLogger creates a new mock of the baseLogger interface. All
-// methods return zero values for all results, unless overwritten.
-func NewMockBaseLogger() *MockBaseLogger {
-	return &MockBaseLogger{
-		LogFunc: &BaseLoggerLogFunc{
+// NewMockLogSink creates a new mock of the logSink interface. All methods
+// return zero values for all results, unless overwritten.
+func NewMockLogSink() *MockLogSink {
+	return &MockLogSink{
+		LogFunc: &LogSinkLogFunc{
 			defaultHook: func(time.Time, LogLevel, LogFields, string) error {
 				return nil
 			},
@@ -27,51 +27,51 @@ func NewMockBaseLogger() *MockBaseLogger {
 	}
 }
 
-// surrogateMockBaseLogger is a copy of the baseLogger interface (from the
-// package github.com/go-nacelle/log). It is redefined here as it is
-// unexported in the source packge.
-type surrogateMockBaseLogger interface {
+// surrogateMockLogSink is a copy of the logSink interface (from the package
+// github.com/go-nacelle/log). It is redefined here as it is unexported in
+// the source packge.
+type surrogateMockLogSink interface {
 	Log(time.Time, LogLevel, LogFields, string) error
 }
 
-// NewMockBaseLoggerFrom creates a new mock of the MockBaseLogger interface.
-// All methods delegate to the given implementation, unless overwritten.
-func NewMockBaseLoggerFrom(i surrogateMockBaseLogger) *MockBaseLogger {
-	return &MockBaseLogger{
-		LogFunc: &BaseLoggerLogFunc{
+// NewMockLogSinkFrom creates a new mock of the MockLogSink interface. All
+// methods delegate to the given implementation, unless overwritten.
+func NewMockLogSinkFrom(i surrogateMockLogSink) *MockLogSink {
+	return &MockLogSink{
+		LogFunc: &LogSinkLogFunc{
 			defaultHook: i.Log,
 		},
 	}
 }
 
-// BaseLoggerLogFunc describes the behavior when the Log method of the
-// parent MockBaseLogger instance is invoked.
-type BaseLoggerLogFunc struct {
+// LogSinkLogFunc describes the behavior when the Log method of the parent
+// MockLogSink instance is invoked.
+type LogSinkLogFunc struct {
 	defaultHook func(time.Time, LogLevel, LogFields, string) error
 	hooks       []func(time.Time, LogLevel, LogFields, string) error
-	history     []BaseLoggerLogFuncCall
+	history     []LogSinkLogFuncCall
 	mutex       sync.Mutex
 }
 
 // Log delegates to the next hook function in the queue and stores the
 // parameter and result values of this invocation.
-func (m *MockBaseLogger) Log(v0 time.Time, v1 LogLevel, v2 LogFields, v3 string) error {
+func (m *MockLogSink) Log(v0 time.Time, v1 LogLevel, v2 LogFields, v3 string) error {
 	r0 := m.LogFunc.nextHook()(v0, v1, v2, v3)
-	m.LogFunc.appendCall(BaseLoggerLogFuncCall{v0, v1, v2, v3, r0})
+	m.LogFunc.appendCall(LogSinkLogFuncCall{v0, v1, v2, v3, r0})
 	return r0
 }
 
 // SetDefaultHook sets function that is called when the Log method of the
-// parent MockBaseLogger instance is invoked and the hook queue is empty.
-func (f *BaseLoggerLogFunc) SetDefaultHook(hook func(time.Time, LogLevel, LogFields, string) error) {
+// parent MockLogSink instance is invoked and the hook queue is empty.
+func (f *LogSinkLogFunc) SetDefaultHook(hook func(time.Time, LogLevel, LogFields, string) error) {
 	f.defaultHook = hook
 }
 
 // PushHook adds a function to the end of hook queue. Each invocation of the
-// Log method of the parent MockBaseLogger instance invokes the hook at the
+// Log method of the parent MockLogSink instance invokes the hook at the
 // front of the queue and discards it. After the queue is empty, the default
 // hook function is invoked for any future action.
-func (f *BaseLoggerLogFunc) PushHook(hook func(time.Time, LogLevel, LogFields, string) error) {
+func (f *LogSinkLogFunc) PushHook(hook func(time.Time, LogLevel, LogFields, string) error) {
 	f.mutex.Lock()
 	f.hooks = append(f.hooks, hook)
 	f.mutex.Unlock()
@@ -79,7 +79,7 @@ func (f *BaseLoggerLogFunc) PushHook(hook func(time.Time, LogLevel, LogFields, s
 
 // SetDefaultReturn calls SetDefaultDefaultHook with a function that returns
 // the given values.
-func (f *BaseLoggerLogFunc) SetDefaultReturn(r0 error) {
+func (f *LogSinkLogFunc) SetDefaultReturn(r0 error) {
 	f.SetDefaultHook(func(time.Time, LogLevel, LogFields, string) error {
 		return r0
 	})
@@ -87,13 +87,13 @@ func (f *BaseLoggerLogFunc) SetDefaultReturn(r0 error) {
 
 // PushReturn calls PushDefaultHook with a function that returns the given
 // values.
-func (f *BaseLoggerLogFunc) PushReturn(r0 error) {
+func (f *LogSinkLogFunc) PushReturn(r0 error) {
 	f.PushHook(func(time.Time, LogLevel, LogFields, string) error {
 		return r0
 	})
 }
 
-func (f *BaseLoggerLogFunc) nextHook() func(time.Time, LogLevel, LogFields, string) error {
+func (f *LogSinkLogFunc) nextHook() func(time.Time, LogLevel, LogFields, string) error {
 	f.mutex.Lock()
 	defer f.mutex.Unlock()
 
@@ -106,26 +106,26 @@ func (f *BaseLoggerLogFunc) nextHook() func(time.Time, LogLevel, LogFields, stri
 	return hook
 }
 
-func (f *BaseLoggerLogFunc) appendCall(r0 BaseLoggerLogFuncCall) {
+func (f *LogSinkLogFunc) appendCall(r0 LogSinkLogFuncCall) {
 	f.mutex.Lock()
 	f.history = append(f.history, r0)
 	f.mutex.Unlock()
 }
 
-// History returns a sequence of BaseLoggerLogFuncCall objects describing
-// the invocations of this function.
-func (f *BaseLoggerLogFunc) History() []BaseLoggerLogFuncCall {
+// History returns a sequence of LogSinkLogFuncCall objects describing the
+// invocations of this function.
+func (f *LogSinkLogFunc) History() []LogSinkLogFuncCall {
 	f.mutex.Lock()
-	history := make([]BaseLoggerLogFuncCall, len(f.history))
+	history := make([]LogSinkLogFuncCall, len(f.history))
 	copy(history, f.history)
 	f.mutex.Unlock()
 
 	return history
 }
 
-// BaseLoggerLogFuncCall is an object that describes an invocation of method
-// Log on an instance of MockBaseLogger.
-type BaseLoggerLogFuncCall struct {
+// LogSinkLogFuncCall is an object that describes an invocation of method
+// Log on an instance of MockLogSink.
+type LogSinkLogFuncCall struct {
 	// Arg0 is the value of the 1st argument passed to this method
 	// invocation.
 	Arg0 time.Time
@@ -145,12 +145,12 @@ type BaseLoggerLogFuncCall struct {
 
 // Args returns an interface slice containing the arguments of this
 // invocation.
-func (c BaseLoggerLogFuncCall) Args() []interface{} {
+func (c LogSinkLogFuncCall) Args() []interface{} {
 	return []interface{}{c.Arg0, c.Arg1, c.Arg2, c.Arg3}
 }
 
 // Results returns an interface slice containing the results of this
 // invocation.
-func (c BaseLoggerLogFuncCall) Results() []interface{} {
+func (c LogSinkLogFuncCall) Results() []interface{} {
 	return []interface{}{c.Result0}
 }

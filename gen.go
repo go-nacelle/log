@@ -1,3 +1,3 @@
 package log
 
-//go:generate go-mockgen -f github.com/go-nacelle/log -i baseLogger -o base_logger_mock_test.go
+//go:generate go-mockgen -f github.com/go-nacelle/log -i logSink -o log_sink_mock_test.go

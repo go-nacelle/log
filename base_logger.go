@@ -9,12 +9,12 @@ import (
 	"github.com/derision-test/glock"
 )
 
-type minimalLogger interface {
+type logSink interface {
 	Log(timestamp time.Time, level LogLevel, fields LogFields, msg string) error
 }
 
 type baseWrapper struct {
-	logger   minimalLogger
+	logSink  logSink
 	level    LogLevel
 	clock    glock.Clock
 	exiter   func()
@@ -26,9 +26,9 @@ type baseLogger struct {
 	fields  LogFields
 }
 
-func newBaseLogger(logger minimalLogger, level LogLevel, initialFields LogFields) Logger {
+func newBaseLogger(logSink logSink, level LogLevel, initialFields LogFields) Logger {
 	wrapper := &baseWrapper{
-		logger,
+		logSink,
 		level,
 		glock.NewRealClock(),
 		func() { os.Exit(1) },
@@ -38,9 +38,9 @@ func newBaseLogger(logger minimalLogger, level LogLevel, initialFields LogFields
 	return FromMinimalLogger(&baseLogger{wrapper, initialFields})
 }
 
-func newTestLogger(logger minimalLogger, level LogLevel, initialFields LogFields, clock glock.Clock, exiter func()) Logger {
+func newTestLogger(logSink logSink, level LogLevel, initialFields LogFields, clock glock.Clock, exiter func()) Logger {
 	wrapper := &baseWrapper{
-		logger,
+		logSink,
 		level,
 		clock,
 		exiter,
@@ -67,7 +67,7 @@ func (s *baseLogger) LogWithFields(level LogLevel, fields LogFields, format stri
 	fields = fields.normalizeTimeValues()
 	fields["sequenceNumber"] = seq
 
-	s.wrapper.logger.Log(
+	s.wrapper.logSink.Log(
 		s.wrapper.clock.Now().UTC(),
 		level,
 		s.fields.concat(fields),
