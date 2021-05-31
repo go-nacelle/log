@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [v2.0.0] - 2021-05-31
+
 ### Added
 
 - Exposed the interface `MinimalLogger` and its constructor `FromMinimalLogger`. [#5](https://github.com/go-nacelle/log/pull/5)
@@ -58,3 +62,4 @@
 [v1.1.0]: https://github.com/go-nacelle/log/compare/v1.0.1...v1.1.0
 [v1.1.1]: https://github.com/go-nacelle/log/compare/v1.1.0...v1.1.1
 [v1.1.2]: https://github.com/go-nacelle/log/compare/v1.1.1...v1.1.2
+[v2.0.0]: https://github.com/go-nacelle/log/compare/v1.1.2...v2.0.0

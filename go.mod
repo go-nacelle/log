@@ -1,4 +1,4 @@
-module github.com/go-nacelle/log
+module github.com/go-nacelle/log/v2
 
 go 1.16
 
