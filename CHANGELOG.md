@@ -10,6 +10,10 @@
 
 - Removed mocks package. [#6](https://github.com/go-nacelle/log/pull/6)
 
+### Changed
+
+- Renamed `ReplayAdapter` and `RollupAdapter` and to `ReplayLogger` and `RollupLogger`, respectively. [#5](https://github.com/go-nacelle/log/pull/5)
+
 ## [v1.1.2] - 2020-09-30
 
 ### Removed
