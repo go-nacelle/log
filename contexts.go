@@ -6,7 +6,7 @@ type loggerKeyType struct{}
 
 var loggerKey = loggerKeyType{}
 
-func WithContext(ctx context.Context, logger Logger) context.Context {
+func WithLogger(ctx context.Context, logger Logger) context.Context {
 	return context.WithValue(ctx, loggerKey, logger)
 }
 

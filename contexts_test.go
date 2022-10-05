@@ -26,7 +26,7 @@ func TestWithAndFromContext(t *testing.T) {
 		logger := newTestLogger(sink, LevelDebug, nil, clock, func() {})
 
 		ctx := context.Background()
-		ctx = WithContext(ctx, logger)
+		ctx = WithLogger(ctx, logger)
 
 		ctxLogger := FromContext(ctx)
 		assert.Same(t, logger, ctxLogger)
