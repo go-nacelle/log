@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [v2.0.1] - 2022-10-10
+
+### Added
+
+- Added `WithLogger` and `FromContext`. [#8](https://github.com/go-nacelle/log/pull/8)
+
 ## [v2.0.0] - 2021-05-31
 
 ### Added
@@ -54,10 +60,11 @@
 
 - Migrated from [efritz/nacelle](https://github.com/efritz/nacelle).
 
-[Unreleased]: https://github.com/go-nacelle/log/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/go-nacelle/log/compare/v2.0.1...HEAD
 [v1.0.0]: https://github.com/go-nacelle/log/releases/tag/v1.0.0
 [v1.0.1]: https://github.com/go-nacelle/log/compare/v1.0.0...v1.0.1
 [v1.1.0]: https://github.com/go-nacelle/log/compare/v1.0.1...v1.1.0
 [v1.1.1]: https://github.com/go-nacelle/log/compare/v1.1.0...v1.1.1
 [v1.1.2]: https://github.com/go-nacelle/log/compare/v1.1.1...v1.1.2
 [v2.0.0]: https://github.com/go-nacelle/log/compare/v1.1.2...v2.0.0
+[v2.0.1]: https://github.com/go-nacelle/log/compare/v2.0.0...v2.0.1
