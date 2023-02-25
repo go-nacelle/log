@@ -9,5 +9,5 @@ require (
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d
 	github.com/stretchr/testify v1.6.1
-	golang.org/x/sys v0.0.0-20210531080801-fdfd190a6549 // indirect
+	golang.org/x/sys v0.1.0 // indirect
 )
